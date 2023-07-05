@@ -92,8 +92,8 @@ export class MapBuilder {
         this._containerSize.h = this.pageElement.offsetHeight;
 
         const minScale = Math.min(
-            MathHelper.round(this._containerSize.w / this._mapSize.w),
-            MathHelper.round(this._containerSize.h / this._mapSize.h)
+            (this._containerSize.w * 100 / this._mapSize.w) / 100,
+            (this._containerSize.h * 100 / this._mapSize.h) / 100
         );
         this._scale = this._currentScale = this._scaleMin = MathHelper.floor(minScale);
         this._scaleMax = this._scaleMin + 1;
