@@ -43,7 +43,7 @@ const routes: Routes = [
     },
     {
         path: "home",
-        canActivate: [loggedInGuard],
+        canActivate: [],
         component: HomeComponent,
         title: "Home",
     },

@@ -168,60 +168,6 @@ p-dropdown.ng-touched.p-invalid > div {
   }
 }
 
-
-.p-dialog {
-  &.device-modal {
-    min-width: 300px;
-
-    @media screen and (max-width: $mobile-breakpoint-width) {
-      width: 100%;
-    }
-
-
-    .p-dialog-content {
-      padding-top: 5px;
-
-    }
-  }
-
-  .p-dialog-content {
-    .p-card {
-      margin-bottom: 0;
-      margin-top: 10px;
-
-      .p-card-body {
-        padding: 0;
-      }
-    }
-  }
-}
-
-
-.p-toast {
-  &, .p-element {
-    max-width: 100%;
-  }
-
-  &.p-toast-bottom-right, &.p-toast-top-right {
-    right: 0 !important;
-  }
-
-  padding: 0 20px;
-}
-
-.align-right {
-  text-align: right !important;
-}
-
-.draggable {
-  cursor: move;
-}
-
-.editMode {
-  box-shadow: 0 0 0 1px #d0d0d0;
-  background: rgba(0, 0, 0, 0.6);
-}
-
 @media screen and (max-width: $mobile-breakpoint-width) {
   .field-row.mobile-column {
     flex-direction: column !important;

@@ -1,2 +1,2 @@
-export * from './device.state'
-export * from './device.action'
+export * from './shooting.state'
+export * from './shooting.action'

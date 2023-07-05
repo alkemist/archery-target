@@ -8,6 +8,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppRoutingModule} from './modules/app-routing.module';
 import {StoringModule} from './modules/storing.module';
 import {SharingModule} from './modules/sharing.module';
+import {BlockableDivComponent} from "./components/layouts/blockable-div/blockable-div.component";
 
 @NgModule({
     declarations: [
@@ -15,6 +16,7 @@ import {SharingModule} from './modules/sharing.module';
         LoginComponent,
         HomeComponent,
         HeaderComponent,
+        BlockableDivComponent,
     ],
     imports: [
         BrowserModule,

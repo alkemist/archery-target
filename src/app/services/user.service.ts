@@ -1,7 +1,7 @@
 import {Inject, Injectable} from "@angular/core";
 import {BehaviorSubject, filter, map, Observable, of} from "rxjs";
 import {FirestoreService} from "./firestore.service";
-import {OauthTokenModel, OauthTokensModel, UserInterface, UserModel} from "@models";
+import {UserInterface, UserModel} from "@models";
 import {
     InvalidEmailError,
     OfflineError,
@@ -86,10 +86,6 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
             filter((isLoggedIn) => isLoggedIn !== null),
             map((isLoggedIn) => !!isLoggedIn)
         );
-    }
-
-    getToken(appKey: AppKey): OauthTokensModel {
-        return this.user[appKey];
     }
 
     login(email: string, password: string): Promise<void> {
@@ -189,25 +185,7 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
     }
 
     async logout(): Promise<void> {
-        this._user = null;
-        this._isLoggedIn.next(false);
         return signOut(this.auth);
-    }
-
-    updateRefreshToken(type: AppKey, oauthToken: OauthTokenModel) {
-        if (this._user) {
-            this._user[type].setRefreshToken(oauthToken);
-            return this.updateOne(this._user);
-        }
-        return Promise.reject();
-    }
-
-    updateAccessToken(type: AppKey, oauthToken: OauthTokenModel) {
-        if (this._user) {
-            this._user[type].setAccessToken(oauthToken);
-            return this.updateOne(this._user);
-        }
-        return Promise.reject();
     }
 
     private getUser(userFirebase: User) {

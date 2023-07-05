@@ -1,10 +1,13 @@
 import {DocumentBackInterface, HasIdWithInterface} from "../document";
-import {OauthTokensInterface} from "../oauth";
 
+export interface Viewfinder {
+    distance: number,
+    set: number
+}
 
 export interface UserInterface extends DocumentBackInterface {
     email: string;
-    google?: OauthTokensInterface;
+    viewfinders?: Viewfinder[]
 }
 
 export type UserStoredInterface = HasIdWithInterface<UserInterface>;

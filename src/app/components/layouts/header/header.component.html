@@ -1,29 +1,27 @@
 <p-toolbar class="header" id="topToolbar">
-  <!-- Begin Toolbar Left -->
-  <div class="p-toolbar-group-left gap-1">
-    <button *ngIf="loading()" [disabled]="true"
-            class="p-button-rounded p-button-text" icon="pi pi-spin pi-spinner" pButton></button>
-    <button *ngIf="!loading() && !logged()" [disabled]="true"
-            class="p-button-rounded p-button-text" icon="pi pi-user" pButton></button>
-    <button (click)="menuEl.toggle($event)" *ngIf="!loading() && logged()" class="p-button-rounded p-button-text"
-            icon="pi pi-align-justify" pButton pRipple
-            type="button"></button>
-    <span class="header__logo">
+    <!-- Begin Toolbar Left -->
+    <div class="p-toolbar-group-left gap-1">
+        <button *ngIf="loading()" [disabled]="true"
+                class="p-button-rounded p-button-text" icon="pi pi-spin pi-spinner" pButton></button>
+        <button (click)="menuEl.toggle($event)" *ngIf="!loading()" class="p-button-rounded p-button-text"
+                icon="pi pi-align-justify" pButton pRipple
+                type="button"></button>
+        <span class="header__logo">
       {{ title() }}
     </span>
-  </div>
-  <!-- End Toolbar Left -->
+    </div>
+    <!-- End Toolbar Left -->
 
-  <!-- Begin Toolbar Middle -->
-  <div class="filter-name flex flex-row align-items-center">
+    <!-- Begin Toolbar Middle -->
+    <div class="filter-name flex flex-row align-items-center">
 
-  </div>
-  <!-- End Toolbar Middle -->
+    </div>
+    <!-- End Toolbar Middle -->
 
-  <!-- Begin Toolbar Right -->
-  <div class="p-toolbar-group-right">
+    <!-- Begin Toolbar Right -->
+    <div class="p-toolbar-group-right">
 
-  </div>
-  <!-- End Toolbar Right -->
+    </div>
+    <!-- End Toolbar Right -->
 </p-toolbar>
 <p-tieredMenu #menuEl [autoDisplay]="true" [model]="menuItems" [popup]="true"></p-tieredMenu>

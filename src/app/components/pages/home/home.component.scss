@@ -1,0 +1,41 @@
+@import "/src/assets/styles/variables";
+
+.page-container__content {
+  padding: 0;
+  height: 100%;
+}
+
+#page {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#map {
+  touch-action: none;
+  position: relative;
+}
+
+#target {
+  pointer-events: none;
+}
+
+.actions {
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding-right: 20px;
+  width: 130px;
+
+  height: $header-desktop-height;
+
+  @media screen and (max-width: $tablet-breakpoint-width) {
+    height: $header-mobile-height;
+  }
+}
+
+

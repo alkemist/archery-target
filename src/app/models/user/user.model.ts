@@ -1,25 +1,15 @@
-import {UserInterface, UserStoredInterface} from "./user.interface";
+import {UserInterface, UserStoredInterface, Viewfinder} from "./user.interface";
 import {DocumentModel} from "../document";
-import {OauthTokensModel} from "../oauth";
 
 
 export class UserModel extends DocumentModel {
     protected _email: string;
+    protected _viewfinders: Viewfinder[]
 
     constructor(user: UserStoredInterface) {
         super(user);
         this._email = user.email ?? "";
-        this._google = new OauthTokensModel(user.google ?? {});
-    }
-
-    protected _google: OauthTokensModel;
-
-    get google() {
-        return this._google;
-    }
-
-    set google(oauthToken: OauthTokensModel) {
-        this._google = oauthToken;
+        this._viewfinders = user.viewfinders ?? [];
     }
 
     override toFirestore(): UserInterface {

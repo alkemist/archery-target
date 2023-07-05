@@ -1,1 +1,14 @@
-Home
+<blockable-div #lockable class="page-container__content">
+    <div #page [class.landscape]="isLandscape" id="page">
+        <div #map id="map">
+            <img #target (mousedown)="$event.preventDefault()" alt="" id="target" onContextMenu="return false;" src=""/>
+            <ng-template #container></ng-template>
+        </div>
+    </div>
+    <div class="actions flex align-items-center justify-content-end gap-4">
+
+    </div>
+</blockable-div>
+<p-blockUI [blocked]="shootingLoading" [target]="lockable">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
