@@ -1,0 +1,67 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ESNext",
+      "dom"
+    ],
+    "paths": {
+      "@base-component": [
+        "src/app/components/base.component"
+      ],
+      "@components": [
+        "src/app/components"
+      ],
+      "@errors": [
+        "src/app/errors"
+      ],
+      "@consts": [
+        "src/app/consts"
+      ],
+      "@models": [
+        "src/app/models"
+      ],
+      "@modules": [
+        "src/app/modules"
+      ],
+      "@services": [
+        "src/app/services"
+      ],
+      "@tools": [
+        "src/app/tools"
+      ],
+      "@mocks": [
+        "src/app/mocks"
+      ],
+      "@converters": [
+        "src/app/converters"
+      ],
+      "@stores": [
+        "src/app/stores"
+      ]
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

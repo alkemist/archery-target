@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "name": "Archery Target",
+  "short_name": "Archery Target",
+  "description": "",
+  "lang": "en",
+  "theme_color": "#040d19",
+  "background_color": "#040d19",
+  "display": "standalone",
+  "orientation": "any",
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "protocol_handlers": [],
+  "icons": [
+     {
+          "src": "favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+      },
+     {
+          "src": "favicon.svg",
+          "sizes": "600x600",
+          "type": "image/svg+xml"
+      }
+  ]
+}

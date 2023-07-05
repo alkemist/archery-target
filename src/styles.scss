@@ -1,0 +1,238 @@
+/* You can add global styles to this file, and also import other style files */
+@import "assets/styles/reset";
+@import 'primeng/resources/primeng.min.css';
+@import 'primeng/resources/themes/lara-dark-blue/theme.css';
+@import 'primeicons/primeicons.css';
+@import 'primeflex/primeflex.min.css';
+@import "assets/styles/variables";
+
+body, .page-conainer {
+  overscroll-behavior: none
+}
+
+.page-container {
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  &__content {
+    overflow: auto;
+    max-height: 100%;
+    width: 100%;
+    padding: 20px;
+
+    @media screen and (max-width: $mobile-portrait-breakpoint-width) {
+      padding: 10px;
+    }
+
+    &__center {
+      margin: auto;
+      max-width: $page-width;
+    }
+  }
+}
+
+.shadow {
+  box-shadow: 0 2px 1px -1px rgb(0 0 0 / 20%),
+  0 1px 1px 0 rgb(0 0 0 / 14%),
+  0 1px 3px 0 rgb(0 0 0 / 12%);
+}
+
+
+form {
+  .p-card {
+    .p-card-body {
+
+      .p-card-content {
+        padding-top: 1rem !important;
+
+        h5 {
+          margin: 2rem 0 1rem;
+          font-weight: bold;
+        }
+
+        .field-row {
+          .inline-label {
+            display: block;
+
+            padding: 0.75rem;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+          }
+
+          .p-error {
+            padding: 0.5rem 1rem;
+            font-size: smaller;
+          }
+        }
+
+        .field-float {
+          margin-top: 2rem;
+        }
+      }
+    }
+  }
+}
+
+p-inputNumber, p-autoComplete {
+  & > span, & > span > input {
+    width: 100%;
+  }
+}
+
+.p-inputtext.ng-touched.p-invalid,
+p-autoComplete.ng-touched.ng-invalid input,
+p-inputnumber.ng-touched.p-invalid input,
+p-dropdown.ng-touched.p-invalid > div {
+  border-color: #e97984;
+}
+
+.p-accordion-header-link {
+  &:hover, &:active, &:focus {
+    text-decoration: none;
+  }
+}
+
+.p-dropdown, .p-multiselect {
+  width: 100%;
+}
+
+.p-datatable {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100%;
+
+  .p-datatable-wrapper {
+    height: 100%;
+
+    .p-datatable-thead > tr > th {
+      padding: 0.7rem 1rem;
+
+      & > .p-button {
+        display: flex;
+      }
+    }
+
+    .p-datatable-tbody > tr > td {
+      padding: 0.9rem 1rem;
+      vertical-align: middle;
+    }
+  }
+
+  .p-paginator-bottom {
+    border-top: 1px solid #0b213f;
+  }
+}
+
+.loader {
+  padding: 20px;
+  text-align: center;
+
+  i {
+    font-size: 4rem;
+  }
+}
+
+.tablet-showed {
+  @media screen and (max-width: $tablet-breakpoint-width) {
+    display: block;
+  }
+}
+
+.mobile-hidden {
+  @media screen and (max-width: $mobile-breakpoint-width) {
+    display: none;
+  }
+}
+
+.tablet-hidden {
+  @media screen and (max-width: $tablet-breakpoint-width) {
+    display: none;
+  }
+}
+
+.hide-label-mobile {
+  @media screen and (max-width: $tablet-breakpoint-width) {
+    .p-button-label {
+      display: none;
+    }
+    .p-button-icon-left {
+      margin-right: 0;
+    }
+    .p-button-icon-right {
+      margin-left: 0;
+    }
+  }
+}
+
+
+.p-dialog {
+  &.device-modal {
+    min-width: 300px;
+
+    @media screen and (max-width: $mobile-breakpoint-width) {
+      width: 100%;
+    }
+
+
+    .p-dialog-content {
+      padding-top: 5px;
+
+    }
+  }
+
+  .p-dialog-content {
+    .p-card {
+      margin-bottom: 0;
+      margin-top: 10px;
+
+      .p-card-body {
+        padding: 0;
+      }
+    }
+  }
+}
+
+
+.p-toast {
+  &, .p-element {
+    max-width: 100%;
+  }
+
+  &.p-toast-bottom-right, &.p-toast-top-right {
+    right: 0 !important;
+  }
+
+  padding: 0 20px;
+}
+
+.align-right {
+  text-align: right !important;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.editMode {
+  box-shadow: 0 0 0 1px #d0d0d0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+@media screen and (max-width: $mobile-breakpoint-width) {
+  .field-row.mobile-column {
+    flex-direction: column !important;
+
+    & > .flex-column {
+      width: 100%;
+
+      & > .p-float-label {
+        margin-top: 10px;
+      }
+    }
+  }
+}
+
