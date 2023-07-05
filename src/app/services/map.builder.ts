@@ -139,11 +139,11 @@ export class MapBuilder {
                 this._scaleMin, this._scaleMax
             );
 
-            this.updateRange();
             this.updateCurrentPosition({
                 x: MathHelper.round(this._mapPosition.x + event.deltaX),
                 y: MathHelper.round(this._mapPosition.y + event.deltaY)
             });
+            this.updateRange();
             this.updateMap(this._currentScale);
         });
 
@@ -184,12 +184,15 @@ export class MapBuilder {
                         this._scaleMax
                     );
 
+                this.updateCurrentPosition({
+                    x: this._currentMapPosition.x,
+                    y: this._currentMapPosition.y
+                });
                 this.updateRange();
-                this.updateCurrentPosition(this._currentMapPosition);
                 this.updateMap(this._currentScale);
 
                 this.updateValues();
-            }, false);
+            }, {passive: false});
         }
     }
 
