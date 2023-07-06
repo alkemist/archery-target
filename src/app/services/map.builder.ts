@@ -1,8 +1,11 @@
 import {ElementRef, Injectable, ViewContainerRef} from '@angular/core';
 
 import 'hammerjs';
-import {Arrow, CoordinateInterface, SizeInterface} from "@models";
+import {ArrowInterface, CoordinateInterface, SizeInterface} from "@models";
 import {MathHelper} from "@tools";
+import {ArrowComponent} from "@components";
+import {Subject} from "rxjs";
+import {ArrowModel} from "../models/archery/arrow.model";
 
 
 @Injectable({
@@ -11,7 +14,8 @@ import {MathHelper} from "@tools";
 export class MapBuilder {
     private _viewContainerRef?: ViewContainerRef;
     private _containerSize: SizeInterface = {w: 0, h: 0};
-    private _mapSize: SizeInterface = {w: 0, h: 0};
+    private _targetSize: SizeInterface = {w: 0, h: 0};
+    private _targetCenter: CoordinateInterface = {x: 0, y: 0};
     private _currentScale: number = 1;
     private _scale: number = 1;
     private _scaleMin: number = 1;
@@ -24,23 +28,28 @@ export class MapBuilder {
     private _isDragging = false;
     private _isZooming = false;
     private _targetElement?: HTMLImageElement;
+    private _arrowAdded = new Subject<ArrowInterface>();
+
+    private _hammer?: HammerManager;
+    private _pageElement?: HTMLElement;
+    private _mapElement?: HTMLElement;
+
+    private _rayons: number[] = []
 
     constructor() {
     }
 
-    private _hammer?: HammerManager;
+    get onArrowAdded$() {
+        return this._arrowAdded.asObservable();
+    }
 
     private get hammer(): HammerManager {
         return this._hammer as HammerManager;
     }
 
-    private _pageElement?: HTMLElement;
-
     private get pageElement(): HTMLElement {
         return this._pageElement as HTMLElement;
     }
-
-    private _mapElement?: HTMLElement;
 
     private get mapElement(): HTMLElement {
         return this._mapElement as HTMLElement;
@@ -52,7 +61,8 @@ export class MapBuilder {
         this._pageElement = undefined;
         this._hammer = undefined;
         this._containerSize = {w: 0, h: 0};
-        this._mapSize = {w: 0, h: 0};
+        this._targetSize = {w: 0, h: 0};
+        this._targetCenter = {x: 0, y: 0};
         this._currentScale = 1;
         this._scale = 1;
         this._scaleMin = 1;
@@ -66,7 +76,7 @@ export class MapBuilder {
         this._isZooming = false;
     }
 
-    build(arrows: Arrow[]) {
+    build(arrows: ArrowInterface[]) {
 
     }
 
@@ -89,27 +99,24 @@ export class MapBuilder {
 
     setAllElements(viewContainerRef: ViewContainerRef | undefined, pageRef: ElementRef, mapRef: ElementRef) {
         this._viewContainerRef = viewContainerRef;
+        this._pageElement = pageRef.nativeElement;
+        this._mapElement = mapRef.nativeElement;
 
-        this.setHtmlElements(pageRef, mapRef);
         this.checkPageStatus();
     }
 
-    setHtmlElements(pageRef: ElementRef, mapRef: ElementRef) {
-        this._pageElement = pageRef.nativeElement;
-        this._mapElement = mapRef.nativeElement;
-    }
 
     updateSize() {
         this._containerSize.w = this.pageElement.offsetWidth;
         this._containerSize.h = this.pageElement.offsetHeight;
 
         const minScale = Math.min(
-            (this._containerSize.w * 100 / this._mapSize.w) / 100,
-            (this._containerSize.h * 100 / this._mapSize.h) / 100
+            (this._containerSize.w * 100 / this._targetSize.w) / 100,
+            (this._containerSize.h * 100 / this._targetSize.h) / 100
         );
 
         const diff = MathHelper.ceil(
-            (this._containerSize.w + this._containerSize.h) / (this._mapSize.w + this._mapSize.h)
+            (this._containerSize.w + this._containerSize.h) / (this._targetSize.w + this._targetSize.h)
         );
 
         this._scaleMin = MathHelper.floor(minScale);
@@ -127,8 +134,8 @@ export class MapBuilder {
     }
 
     updateRange() {
-        const rangeX = Math.max(0, MathHelper.round(this._mapSize.w * this._currentScale) - this._containerSize.w);
-        const rangeY = Math.max(0, MathHelper.round(this._mapSize.h * this._currentScale) - this._containerSize.h);
+        const rangeX = Math.max(0, MathHelper.round(this._targetSize.w * this._currentScale) - this._containerSize.w);
+        const rangeY = Math.max(0, MathHelper.round(this._targetSize.h * this._currentScale) - this._containerSize.h);
 
         this._rangeMax.x = MathHelper.round(rangeX / 2);
         this._rangeMin.x = MathHelper.round(0 - this._rangeMax.x);
@@ -190,8 +197,14 @@ export class MapBuilder {
 
     setTargetElement(targetElement: HTMLImageElement) {
         this._targetElement = targetElement;
-        this._mapSize.w = targetElement.naturalWidth;
-        this._mapSize.h = targetElement.naturalHeight;
+        this._targetSize.w = targetElement.naturalWidth;
+        this._targetSize.h = targetElement.naturalHeight;
+        this._targetCenter.x = this._targetSize.w / 2;
+        this._targetCenter.y = this._targetSize.h / 2;
+
+        const rayon = MathHelper.round(this._targetSize.w / 20)
+        this._rayons = Array.from({length: 10}, (_, i) =>
+            MathHelper.round(rayon * (i + 1)))
 
         this.updateSize();
 
@@ -202,7 +215,7 @@ export class MapBuilder {
     }
 
     private checkPageStatus() {
-        if (this._viewContainerRef && this._mapSize.w && this._mapSize.h) {
+        if (this._viewContainerRef && this._targetSize.w && this._targetSize.h) {
             this.initHammer();
             this.pageElement.addEventListener('wheel', (e) => {
                 if (!this._hammerEnabled) {
@@ -213,14 +226,21 @@ export class MapBuilder {
 
                 this.zoom(
                     this._scale + (event.wheelDelta / 2000),
-                    {
-                        x: event.clientX - (document.body.scrollWidth - this._containerSize.w),
-                        y: event.clientY - (document.body.scrollHeight - this._containerSize.h),
-                    },
+                    this.removeOffset({
+                        x: event.clientX,
+                        y: event.clientY,
+                    }),
                     event.wheelDelta)
 
                 this.updateValues();
             }, {passive: false});
+        }
+    }
+
+    private removeOffset(point: CoordinateInterface) {
+        return {
+            x: point.x - (document.body.scrollWidth - this._containerSize.w),
+            y: point.y - (document.body.scrollHeight - this._containerSize.h)
         }
     }
 
@@ -256,8 +276,48 @@ export class MapBuilder {
         this._mapPosition.y = this._currentMapPosition.y;
     }
 
-    private addArrow(center: CoordinateInterface) {
-        
+    private calculScore(arrow: ArrowModel): number {
+        const index = this._rayons.findIndex((rayon) =>
+            MathHelper.inCircle(arrow.center, this._targetCenter, rayon)
+        )
+
+        return 10 - index;
+    }
+
+    private placeArrow(point: CoordinateInterface): ArrowModel {
+        const position: ArrowInterface = this.removeOffset(point);
+
+        position.x -= this._mapPosition.x;
+        position.x -= (this._containerSize.w - this._targetSize.w * this._scale) / 2
+
+        position.y -= this._mapPosition.y;
+        position.y -= (this._containerSize.h - this._targetSize.h * this._scale) / 2;
+
+        position.x /= this._scale;
+        position.y /= this._scale;
+
+        const arrow = new ArrowModel(position);
+
+        arrow.score = this.calculScore(arrow)
+
+        return arrow;
+    }
+
+    private addArrow(point: CoordinateInterface) {
+        const arrow = this.placeArrow(point);
+
+        if (arrow.x > 0 && arrow.y > 0 && arrow.x < this._targetSize.w && arrow.y < this._targetSize.h) {
+            const componentRef = this._viewContainerRef?.createComponent(ArrowComponent);
+            if (componentRef) {
+                const componentInstance = componentRef.instance;
+
+                componentInstance.setPosition(arrow);
+
+                this.calculScore(arrow);
+
+                this._arrowAdded.next(arrow)
+            }
+        }
     }
 }
 

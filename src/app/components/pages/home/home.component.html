@@ -1,4 +1,4 @@
-<blockable-div #lockable class="page-container__content">
+<blockable #lockable class="page-container__content">
     <div #page [class.landscape]="isLandscape" id="page">
         <div #map id="map">
             <img #target (mousedown)="$event.preventDefault()" alt="" id="target" onContextMenu="return false;" src=""/>
@@ -8,7 +8,7 @@
     <div class="actions flex align-items-center justify-content-end gap-4">
 
     </div>
-</blockable-div>
+</blockable>
 <p-blockUI [blocked]="shootingLoading" [target]="lockable">
     <p-progressSpinner></p-progressSpinner>
 </p-blockUI>

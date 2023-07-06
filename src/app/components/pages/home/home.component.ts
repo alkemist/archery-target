@@ -12,6 +12,7 @@ import {
 } from "@angular/core";
 import BaseComponent from "@base-component";
 import {MapBuilder} from "../../../services/map.builder";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     templateUrl: "./home.component.html",
@@ -36,6 +37,13 @@ export class HomeComponent extends BaseComponent implements OnInit, AfterViewIni
         private changeDetectorRef: ChangeDetectorRef
     ) {
         super();
+
+        this.mapBuilder.onArrowAdded$
+            .pipe(takeUntilDestroyed())
+            .subscribe((arrow) => {
+                //console.log(`[Arrow] Added`, arrow);
+                this.changeDetectorRef.detectChanges();
+            })
     }
 
     ngOnInit(): void {

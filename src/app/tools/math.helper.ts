@@ -1,4 +1,4 @@
-import {CoordinateInterface, SizeInterface} from '@models';
+import {CoordinateInterface} from "@models";
 
 export class MathHelper {
     static clamp(value: number, min: number, max: number) {
@@ -21,37 +21,10 @@ export class MathHelper {
         return Math.ceil(value * Math.pow(10, decimal)) / Math.pow(10, decimal);
     }
 
-    static orientationConverterPointToMap(
-        position: CoordinateInterface,
-        mapSize: SizeInterface,
-        componentSize: SizeInterface,
-        isLandscape: boolean
-    ): CoordinateInterface {
-        if (!isLandscape) {
-            return position;
-        }
-
-        return {
-            x: position.y,
-            y: MathHelper.round(-position.x + mapSize.h - componentSize.h)
-        }
-    }
-
-    // Convertisseur opposé
-    static orientationConverterMapToPoint(
-        position: CoordinateInterface,
-        mapSize: SizeInterface,
-        componentSize: SizeInterface,
-        isLandscape: boolean
-    ): CoordinateInterface {
-        if (!isLandscape) {
-            return position;
-        }
-
-        return {
-            x: MathHelper.round(-position.y + mapSize.h - componentSize.h),
-            y: position.x
-        }
+    static inCircle(point: CoordinateInterface, center: CoordinateInterface, r: number) {
+        const dist_points
+            = Math.pow(point.x - center.x, 2) + Math.pow(point.y - center.y, 2);
+        return dist_points <= Math.pow(r, 2);
     }
 
     /**

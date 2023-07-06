@@ -1,14 +1,14 @@
 import {DocumentBackInterface, DocumentFrontInterface, HasIdWithInterface} from "@models";
 
-export interface Arrow {
+export interface ArrowInterface {
     x: number,
     y: number,
-    score: number
+    score?: number
 }
 
 export interface ShootingFrontInterface extends DocumentFrontInterface {
     date: Date,
-    arrows: Arrow[]
+    arrows: ArrowInterface[]
 }
 
 export type ShootingBackInterface = Partial<ShootingFrontInterface> & DocumentBackInterface;

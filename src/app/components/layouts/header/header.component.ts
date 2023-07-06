@@ -4,7 +4,7 @@ import {map, Subject} from "rxjs";
 import {Title} from "@angular/platform-browser";
 import {AppService, UserService} from "@services";
 import {MenuItem} from "primeng/api";
-import {DataModelMenuItems, LoginMenuItem, LogoutMenuItem, MenuItems} from "./menuItems.data";
+import {BaseMenuItems} from "./menuItems.data";
 import {default as NoSleep} from "nosleep.js";
 import BaseComponent from "@base-component";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
@@ -20,8 +20,8 @@ export class HeaderComponent extends BaseComponent {
     loading = signal(false);
     logged = signal(false);
     title;
-    menuItems: MenuItem[] = MenuItems;
-    notLoggedMenuItems: MenuItem[] = [...MenuItems];
+    menuItems: MenuItem[] = BaseMenuItems;
+    notLoggedMenuItems: MenuItem[] = [...BaseMenuItems];
     services: Record<string, any> = {};
     noSleep = new NoSleep();
     appIsVisible$ = new Subject<boolean>();
@@ -53,10 +53,10 @@ export class HeaderComponent extends BaseComponent {
     }
 
     buildMenu() {
-        this.menuItems = [...MenuItems];
+        this.menuItems = [...BaseMenuItems];
 
         if (this.logged()) {
-            DataModelMenuItems.forEach((menuItem) => {
+            /*DataModelMenuItems.forEach((menuItem) => {
                 this.menuItems.push({
                     ...menuItem, items: [
                         {
@@ -79,11 +79,11 @@ export class HeaderComponent extends BaseComponent {
                         }
                     ],
                 });
-            });
+            });*/
         }
 
         if (this.logged()) {
-            this.menuItems.push({
+            /*this.menuItems.push({
                 separator: true
             });
 
@@ -91,9 +91,9 @@ export class HeaderComponent extends BaseComponent {
                 ...LogoutMenuItem, command: () => {
                     void this.userService.logout();
                 }
-            });
+            });*/
         } else {
-            this.menuItems.push(LoginMenuItem)
+            //this.menuItems.push(LoginMenuItem)
         }
     }
 }

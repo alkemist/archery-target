@@ -6,7 +6,7 @@ interface DataModelMenuItem extends MenuItem {
     listRouterLink: string[],
 }
 
-export const MenuItems: MenuItem[] = [
+export const BaseMenuItems: MenuItem[] = [
     {
         label: $localize`Home`,
         icon: 'pi pi-home',
