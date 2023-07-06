@@ -16,13 +16,13 @@ export class MapBuilder {
     private _scale: number = 1;
     private _scaleMin: number = 1;
     private _scaleMax: number = 1;
-    private _range: CoordinateInterface = {x: 0, y: 0};
     private _rangeMin: CoordinateInterface = {x: 0, y: 0};
     private _rangeMax: CoordinateInterface = {x: 0, y: 0};
     private _currentMapPosition: CoordinateInterface = {x: 0, y: 0};
     private _mapPosition: CoordinateInterface = {x: 0, y: 0};
     private _hammerEnabled = true;
-    private _isDragging = true;
+    private _isDragging = false;
+    private _isZooming = false;
     private _targetElement?: HTMLImageElement;
 
     constructor() {
@@ -57,20 +57,32 @@ export class MapBuilder {
         this._scale = 1;
         this._scaleMin = 1;
         this._scaleMax = 1;
-        this._range = {x: 0, y: 0};
         this._rangeMin = {x: 0, y: 0};
         this._rangeMax = {x: 0, y: 0};
         this._currentMapPosition = {x: 0, y: 0};
         this._mapPosition = {x: 0, y: 0};
         this._hammerEnabled = true;
         this._isDragging = false;
+        this._isZooming = false;
     }
 
     build(arrows: Arrow[]) {
 
     }
 
-    updateCurrentPosition(position: CoordinateInterface) {
+    updateCurrentPosition(position: CoordinateInterface, offset?: SizeInterface) {
+        if (offset) {
+            const newPosX = MathHelper.round(position.x + MathHelper.round(offset.w * this._currentScale));
+            const newPosY = MathHelper.round(position.y + MathHelper.round(offset.h * this._currentScale));
+
+            if (MathHelper.isBetween(newPosX, this._rangeMin.x, this._rangeMax.x)) {
+                position.x = MathHelper.round(position.x + offset.w);
+            }
+            if (MathHelper.isBetween(newPosY, this._rangeMin.y, this._rangeMax.y)) {
+                position.y = MathHelper.round(position.y + offset.h);
+            }
+        }
+
         this._currentMapPosition.x = MathHelper.clamp(position.x, this._rangeMin.x, this._rangeMax.x);
         this._currentMapPosition.y = MathHelper.clamp(position.y, this._rangeMin.y, this._rangeMax.y);
     }
@@ -95,18 +107,33 @@ export class MapBuilder {
             (this._containerSize.w * 100 / this._mapSize.w) / 100,
             (this._containerSize.h * 100 / this._mapSize.h) / 100
         );
-        this._scale = this._currentScale = this._scaleMin = MathHelper.floor(minScale);
-        this._scaleMax = this._scaleMin + 1;
+
+        const diff = MathHelper.ceil(
+            (this._containerSize.w + this._containerSize.h) / (this._mapSize.w + this._mapSize.h)
+        );
+
+        this._scaleMin = MathHelper.floor(minScale);
+        this._scaleMax = this._scaleMin + diff * 2;
+    }
+
+    checkScale() {
+        if (this._scale < this._scaleMin || this._scale > this._scaleMax) {
+            this._scale = this._currentScale = MathHelper.clamp(
+                this._scale,
+                this._scaleMin, this._scaleMax
+            );
+            this.updateMap(this._scale);
+        }
     }
 
     updateRange() {
-        this._range.x = Math.max(0, MathHelper.round(this._mapSize.w * this._currentScale) - this._containerSize.w);
-        this._range.y = Math.max(0, MathHelper.round(this._mapSize.h * this._currentScale) - this._containerSize.h);
+        const rangeX = Math.max(0, MathHelper.round(this._mapSize.w * this._currentScale) - this._containerSize.w);
+        const rangeY = Math.max(0, MathHelper.round(this._mapSize.h * this._currentScale) - this._containerSize.h);
 
-        this._rangeMax.x = MathHelper.round(this._range.x / 2);
+        this._rangeMax.x = MathHelper.round(rangeX / 2);
         this._rangeMin.x = MathHelper.round(0 - this._rangeMax.x);
 
-        this._rangeMax.y = MathHelper.round(this._range.y / 2);
+        this._rangeMax.y = MathHelper.round(rangeY / 2);
         this._rangeMin.y = MathHelper.round(0 - this._rangeMax.y);
     }
 
@@ -121,30 +148,34 @@ export class MapBuilder {
         this.hammer.get('pan').set({enable: true, direction: Hammer.DIRECTION_ALL});
 
         this.hammer.on('pan', (event) => {
-            this._isDragging = true;
+            if (!this._isZooming) {
+                this._isDragging = true;
 
-            this.updateCurrentPosition({
-                x: MathHelper.round(this._mapPosition.x + event.deltaX),
-                y: MathHelper.round(this._mapPosition.y + event.deltaY)
-            });
+                this.updateCurrentPosition({
+                    x: MathHelper.round(this._mapPosition.x + event.deltaX),
+                    y: MathHelper.round(this._mapPosition.y + event.deltaY)
+                });
 
-            this.updateMap(this._scale);
+                this.updateMap(this._scale);
+            }
         });
 
-        this.hammer.on('pinch pinchmove', (event) => {
-            this._isDragging = true;
+        this.hammer.on('pinch', (event) => {
+            if (!this._isDragging) {
+                this._isZooming = true;
 
-            this._currentScale = MathHelper.clamp(
-                MathHelper.round(this._scale * event.scale),
-                this._scaleMin, this._scaleMax
-            );
+                this.zoom(
+                    this._scale * MathHelper.round(event.scale),
+                    {
+                        x: MathHelper.round(event.center.x - (document.body.scrollWidth - this._containerSize.w)),
+                        y: MathHelper.round(event.center.y - (document.body.scrollHeight - this._containerSize.h)),
+                    }
+                )
+            }
+        });
 
-            this.updateCurrentPosition({
-                x: MathHelper.round(this._mapPosition.x + event.deltaX),
-                y: MathHelper.round(this._mapPosition.y + event.deltaY)
-            });
-            this.updateRange();
-            this.updateMap(this._currentScale);
+        this.hammer.on('tap', (event) => {
+            this.addArrow(event.center)
         });
 
         this.hammer.on('panend pancancel pinchend pinchcancel', () => {
@@ -152,6 +183,7 @@ export class MapBuilder {
 
             setTimeout(() => {
                 this._isDragging = false;
+                this._isZooming = false;
             }, 200)
         });
     }
@@ -162,6 +194,8 @@ export class MapBuilder {
         this._mapSize.h = targetElement.naturalHeight;
 
         this.updateSize();
+
+        this._scale = this._currentScale = this._scaleMin;
         this.updateMap(this._scale);
 
         this.checkPageStatus();
@@ -175,24 +209,44 @@ export class MapBuilder {
                     return;
                 }
 
-                const event = e as WheelEventCustom
+                const event = e as WheelEventCustom;
 
-                this._currentScale =
-                    MathHelper.clamp(
-                        MathHelper.round(this._scale + (event.wheelDelta / 800)),
-                        this._scaleMin,
-                        this._scaleMax
-                    );
-
-                this.updateCurrentPosition({
-                    x: this._currentMapPosition.x,
-                    y: this._currentMapPosition.y
-                });
-                this.updateRange();
-                this.updateMap(this._currentScale);
+                this.zoom(
+                    this._scale + (event.wheelDelta / 2000),
+                    {
+                        x: event.clientX - (document.body.scrollWidth - this._containerSize.w),
+                        y: event.clientY - (document.body.scrollHeight - this._containerSize.h),
+                    },
+                    event.wheelDelta)
 
                 this.updateValues();
             }, {passive: false});
+        }
+    }
+
+    private zoom(scale: number, cursorPosition: CoordinateInterface, direction: number = 1) {
+        const newScale =
+            MathHelper.clamp(
+                MathHelper.round(scale),
+                this._scaleMin,
+                this._scaleMax
+            );
+
+        const centerPosition = {
+            x: this._containerSize.w / 2,
+            y: this._containerSize.h / 2
+        }
+
+        const offset = {
+            w: direction > 0 ? centerPosition.x - cursorPosition.x : cursorPosition.x - centerPosition.x,
+            h: direction > 0 ? centerPosition.y - cursorPosition.y : cursorPosition.y - centerPosition.y,
+        }
+
+        if (this._currentScale !== newScale) {
+            this._currentScale = newScale;
+            this.updateRange();
+            this.updateCurrentPosition(this._currentMapPosition, offset);
+            this.updateMap(this._currentScale);
         }
     }
 
@@ -201,8 +255,14 @@ export class MapBuilder {
         this._mapPosition.x = this._currentMapPosition.x;
         this._mapPosition.y = this._currentMapPosition.y;
     }
+
+    private addArrow(center: CoordinateInterface) {
+        
+    }
 }
 
 interface WheelEventCustom extends WheelEvent {
     wheelDelta: number;
+    layerX: number;
+    layerY: number;
 }

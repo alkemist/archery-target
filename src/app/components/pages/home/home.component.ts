@@ -4,6 +4,7 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
+    HostListener,
     OnDestroy,
     OnInit,
     ViewChild,
@@ -41,6 +42,12 @@ export class HomeComponent extends BaseComponent implements OnInit, AfterViewIni
         this.shootingLoading = false;
     }
 
+    @HostListener("window:resize", ["$event"])
+    onResize() {
+        this.mapBuilder.updateSize()
+        this.mapBuilder.checkScale();
+    }
+
     async ngAfterViewInit(): Promise<void> {
         this.mapBuilder.setAllElements(this.viewContainerRef, this.pageRef as ElementRef, this.mapRef as ElementRef);
 
@@ -50,7 +57,6 @@ export class HomeComponent extends BaseComponent implements OnInit, AfterViewIni
                 this.mapBuilder.setTargetElement(onLoadResult.target as HTMLImageElement);
             };
             this.targetRef.nativeElement.src = `/assets/images/WA_80_cm_archery_target.svg`;
-            this.changeDetectorRef.detectChanges();
         }
     }
 
