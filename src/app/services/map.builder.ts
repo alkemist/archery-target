@@ -358,7 +358,7 @@ export class MapBuilder {
 
                 this._arrows.push(arrow);
                 this._arrows = this._arrows
-                    .sort((arrow1, arrow2) => arrow2.distance - arrow1.distance)
+                    .sort((arrow1, arrow2) => arrow1.distance - arrow2.distance)
 
                 this._arrowsChanged.next(this._arrows);
             }
