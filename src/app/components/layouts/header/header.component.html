@@ -31,7 +31,7 @@
 
         <!-- Begin Sidebar -->
         <p-sidebar [(visible)]="sidebarShowed" [fullScreen]="false" position="right" styleClass="w-14rem">
-            <ng-template pTemplate="header">Sorted arrows</ng-template>
+            <ng-template pTemplate="header">{{ arrows().length }} sorted arrows</ng-template>
             <ng-template pTemplate="content">
                 <div *ngFor="let arrow of arrows(); let i = index"
                      class="flex justify-content-between flex-wrap align-items-center gap-4">
