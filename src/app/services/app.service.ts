@@ -15,11 +15,12 @@ export class AppService {
         if (this.pageTitle !== title) {
             this.pageTitle = title;
 
-            if (title !== undefined) {
+            /*if (title !== undefined) {
                 this.titleService.setTitle(`${environment["APP_NAME"]} - ${title}`);
             } else {
                 this.titleService.setTitle(`${environment["APP_NAME"]}`);
-            }
+            }*/
+            this.titleService.setTitle(`${title}`);
         }
     }
 

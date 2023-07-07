@@ -7,8 +7,8 @@
                 icon="pi pi-align-justify" pButton pRipple
                 type="button"></button>
         <span class="header__logo">
-      {{ title() }}
-    </span>
+          {{ title() }}
+        </span>
     </div>
     <!-- End Toolbar Left -->
 
@@ -19,8 +19,8 @@
     <!-- End Toolbar Middle -->
 
     <!-- Begin Toolbar Right -->
-    <div class="p-toolbar-group-right gap-4">
-        <div *ngIf="hasArrows()" class="flex align-items-center justify-content-end gap-4">
+    <div class="p-toolbar-group-right">
+        <div *ngIf="hasArrows()" class="flex align-items-center justify-content-end gap-2">
             <p-toggleButton [formControl]="deleteModeControl"
                             offIcon="fa fa-trash"
                             onIcon="fa fa-trash"
