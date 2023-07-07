@@ -23,6 +23,7 @@ import {OverlayPanelModule} from 'primeng/overlaypanel';
 import {SliderModule} from 'primeng/slider';
 import {ToggleButtonModule} from 'primeng/togglebutton';
 import {ValdemortModule} from "ngx-valdemort";
+import {SidebarModule} from "primeng/sidebar";
 
 const modules = [
     ToolbarModule,
@@ -45,6 +46,7 @@ const modules = [
     InputSwitchModule,
     OverlayPanelModule,
     SliderModule,
+    SidebarModule,
     ToggleButtonModule,
 
     ValdemortModule,

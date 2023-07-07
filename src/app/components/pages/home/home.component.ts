@@ -32,16 +32,17 @@ export class HomeComponent extends BaseComponent implements OnInit, AfterViewIni
     targetLoading: boolean = true;
     isLandscape?: boolean;
 
+    margin = MapBuilder.TARGET_MARGIN + 'px'
+
     constructor(
         private mapBuilder: MapBuilder,
         private changeDetectorRef: ChangeDetectorRef
     ) {
         super();
 
-        this.mapBuilder.onArrowAdded$
+        this.mapBuilder.onArrowsChange$
             .pipe(takeUntilDestroyed())
-            .subscribe((arrow) => {
-                //console.log(`[Arrow] Added`, arrow);
+            .subscribe((arrows) => {
                 this.changeDetectorRef.detectChanges();
             })
     }
@@ -68,9 +69,7 @@ export class HomeComponent extends BaseComponent implements OnInit, AfterViewIni
         }
     }
 
-    // @ts-ignore
-    override ngOnDestroy() {
+    ngOnDestroy() {
         this.mapBuilder.reset();
     }
-
 }

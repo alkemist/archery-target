@@ -49,4 +49,8 @@ export class MathHelper {
 
         return R * c; // in metres
     }
+
+    static flatDistance(pointA: CoordinateInterface, pointB: CoordinateInterface) {
+        return Math.hypot(pointB.x - pointA.x, pointB.y - pointA.y)
+    }
 }

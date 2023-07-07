@@ -11,11 +11,14 @@ import {ArrowModel} from "../../models/archery/arrow.model";
 })
 export class ArrowComponent extends BaseComponent {
     static size = 100;
+
     @HostBinding("style.left") x = "0px";
     @HostBinding("style.top") y = "0px";
     @HostBinding("style.width") w = `${ArrowComponent.size}px`;
     @HostBinding("style.height") h = `${ArrowComponent.size}px`;
     @HostBinding("style.borderRadius") z = `${ArrowComponent.size}px`;
+    @HostBinding("style.backgroundColor") bgColor = "";
+    @HostBinding("style.color") color = "";
 
     constructor() {
         super();
@@ -24,5 +27,8 @@ export class ArrowComponent extends BaseComponent {
     setPosition(arrow: ArrowModel) {
         this.x = arrow.x + "px";
         this.y = arrow.y + "px";
+
+        this.bgColor = arrow.bgColor;
+        this.color = arrow.fontColor;
     }
 }

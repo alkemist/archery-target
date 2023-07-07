@@ -82,6 +82,30 @@ p-inputNumber, p-autoComplete {
   }
 }
 
+.p-togglebutton.p-button {
+  &.p-button-danger {
+    background: transparent;
+    border: none;
+
+    span {
+      color: #EF4444;
+    }
+
+    &.p-highlight {
+      background: #EF4444;
+      border: 1px solid #EF4444;
+
+      span {
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.p-button.p-button-stack {
+  padding: 0.4rem;
+}
+
 .p-inputtext.ng-touched.p-invalid,
 p-autoComplete.ng-touched.ng-invalid input,
 p-inputnumber.ng-touched.p-invalid input,
