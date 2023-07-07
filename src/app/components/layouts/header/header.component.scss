@@ -29,6 +29,10 @@
   height: 20px;
   border-radius: 20px;
   border: 1px solid white;
+
+  &.score_0 {
+    visibility: hidden;
+  }
 }
 
 .header__logo {

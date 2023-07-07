@@ -6,7 +6,7 @@ import {ColorInterface, StyleHelper} from "../../tools/style.helper";
 
 export class ArrowModel {
     static COLORS: { color: ColorInterface, bgOffset: ColorInterface, fontColor: string }[] = [
-        {color: {r: 0, g: 0, b: 0}, bgOffset: {r: 0, g: 0, b: 0, a: 0.8}, fontColor: 'white'},// Out
+        {color: {r: 0, g: 0, b: 0}, bgOffset: {r: 0, g: 0, b: 0, a: 0}, fontColor: 'white'},// Out
         {color: {r: 255, g: 255, b: 255}, bgOffset: {r: -40, g: -40, b: -40, a: 0.6}, fontColor: 'black'},// 1 - white
         {color: {r: 255, g: 255, b: 255}, bgOffset: {r: -230, g: -230, b: -230, a: 0.4}, fontColor: 'white'},// 2 - white
         {color: {r: 0, g: 0, b: 0}, bgOffset: {r: 140, g: 140, b: 140, a: 0.6}, fontColor: 'black'},// 3 - black
@@ -77,7 +77,7 @@ export class ArrowModel {
     }
 
     get color(): string {
-        return this._color;
+        return this.score > 0 ? this._color : '';
     }
 
     get bgColor(): string {

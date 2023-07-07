@@ -36,7 +36,7 @@
                 <div *ngFor="let arrow of arrows(); let i = index"
                      class="flex justify-content-between flex-wrap align-items-center gap-4">
                     <div class="flex align-items-center gap-4">
-                        <div [style.background]="arrow.color" class="dot"></div>
+                        <div [class]="'score_' + arrow.score" [style.background]="arrow.color" class="dot"></div>
                         <div>{{ arrow.score }} pts</div>
                     </div>
                     <p-button (click)="mapBuilder.removeArrowByIndex(i)" icon="pi pi-trash"
