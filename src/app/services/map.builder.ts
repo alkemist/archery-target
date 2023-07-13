@@ -16,7 +16,7 @@ import {CenterComponent} from "../components/center/center.component";
 export class MapBuilder {
     // @TODO Sauvegarder les paramètres viseurs
     // @TODO Determiner le reglage du viseur optimal
-    
+
     static TARGET_MARGIN = 200;
     static ERROR_MARGIN = 10;
 
@@ -261,7 +261,7 @@ export class MapBuilder {
         this.hammer.on('tap', (event) => {
             if (this.isAdding) {
                 this.addArrowByUser(event.center)
-            } else if (event.target.nodeName === "NG-COMPONENT" && event.target.innerHTML === " × ") {
+            } else if (event.target.nodeName === "NG-COMPONENT") {
                 this.removeArrowByPoint(event.center)
             }
         });
@@ -416,11 +416,11 @@ export class MapBuilder {
         const targetOffset = MapBuilder.TARGET_MARGIN / 2
 
         const arrow = new ArrowModel({
-            x: position.x - targetOffset,
-            y: position.y - targetOffset,
+            x: position.x - componentOffset,
+            y: position.y - componentOffset,
             center: {
-                x: position.x - componentOffset,
-                y: position.y - componentOffset
+                x: position.x - targetOffset,
+                y: position.y - targetOffset
             }
         });
 
