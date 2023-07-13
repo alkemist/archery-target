@@ -261,7 +261,7 @@ export class MapBuilder {
         this.hammer.on('tap', (event) => {
             if (this.isAdding) {
                 this.addArrowByUser(event.center)
-            } else if (event.target.nodeName === "NG-COMPONENT") {
+            } else if (event.target.nodeName === "NG-COMPONENT" && event.target.innerHTML === " × ") {
                 this.removeArrowByPoint(event.center)
             }
         });
