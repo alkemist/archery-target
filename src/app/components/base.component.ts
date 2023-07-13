@@ -5,4 +5,8 @@ export default abstract class BaseComponent {
     protected constructor() {
 
     }
+
+    canDeactivate() {
+        return true;
+    }
 }

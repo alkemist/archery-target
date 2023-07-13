@@ -38,7 +38,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
     ngOnInit(): void {
         this.userService.checkLoginWithProvider().then((data) => {
             if (data) {
-                void this.router.navigate(["../", "home"], {relativeTo: this.route});
+                void this.router.navigate(["../", "shooting"], {relativeTo: this.route});
             }
         });
     }
@@ -54,7 +54,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
                             severity: "success",
                             detail: `${$localize`Successfully logged`}`
                         });
-                        void this.router.navigate(["../home"]);
+                        void this.router.navigate(["../shooting"]);
                     })
                     .catch((error) => {
                         this.error = (error as Error).message;

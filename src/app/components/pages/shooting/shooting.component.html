@@ -1,0 +1,45 @@
+<p-button (onClick)="mapBuilder.modalOpened.set(true)" *ngIf="logged()" class="float-button-right"
+          icon="pi pi-pencil" styleClass="p-button-rounded"></p-button>
+<blockable #lockable class="page-container__content">
+    <div #page [class.landscape]="isLandscape" id="page">
+        <div #map [style.padding]="margin" id="map">
+            <img #target (mousedown)="$event.preventDefault()" alt="" id="target"
+                 onContextMenu="return false;"
+                 src=""/>
+            <ng-template #container></ng-template>
+        </div>
+    </div>
+</blockable>
+<p-blockUI [blocked]="shootingLoading" [target]="lockable">
+    <p-progressSpinner></p-progressSpinner>
+</p-blockUI>
+<p-confirmDialog #cd header="Confirmation" i18n-header icon="pi pi-exclamation-triangle" key="shooting">
+    <p-footer>
+        <button (click)="cd.reject()" i18n-label icon="pi pi-times" label="No" pButton
+                pRipple
+                type="button"></button>
+        <button (click)="cd.accept()" class="p-button-danger" i18n-label icon="pi pi-check" label="Yes" pButton
+                pRipple
+                type="button"></button>
+    </p-footer>
+</p-confirmDialog>
+<p-dialog #content [(visible)]="modalOpened"
+          [dismissableMask]="true" [modal]="true" [resizable]="false"
+          appendTo="body" header="Specifications"
+          position="bottom" styleClass="shooting">
+    <form [formGroup]="shootingForm" class="flex flex-column align-items-center gap-4">
+        <div class="flex-auto">
+            <label class="mb-2 block font-bold">Date</label>
+            <p-calendar [appendTo]="content" [touchUI]="true" dateFormat="dd/mm/yy" formControlName="date"></p-calendar>
+        </div>
+        <div class="flex-auto">
+            <label class="mb-2 block font-bold">Distance</label>
+            <p-inputNumber [min]="0" formControlName="distance" suffix=" m"></p-inputNumber>
+        </div>
+        <p-button (onClick)="submitShooting()" [disabled]="mapBuilder.arrowsCount === 0"
+                  class="w-full"
+                  icon="pi pi-check"
+                  label="Save"
+                  styleClass="p-button-success w-full"></p-button>
+    </form>
+</p-dialog>

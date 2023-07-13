@@ -38,6 +38,7 @@ export type AppKey = "google";
 export class UserService extends FirestoreService<UserInterface, UserModel> {
     private auth = getAuth();
     private _isLoggedIn: BehaviorSubject<boolean | null>;
+    private _user: UserModel | null = null;
 
     constructor(
         messageService: MessageService,
@@ -71,8 +72,6 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         });
     }
 
-    private _user: UserModel | null = null;
-
     get user() {
         return this._user as UserModel;
     }
@@ -92,20 +91,28 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         return signInWithEmailAndPassword(this.auth, email, password)
             .then((userCredential) => this.getUser(userCredential.user))
             .catch((error) => {
-                if (error.code === "auth/invalid-email") {
-                    throw new InvalidEmailError();
-                } else if (error.code === "auth/wrong-password" || error.code === "auth/_user-not-found") {
-                    throw new WrongPasswordError();
-                } else if (error.code === "auth/too-many-requests") {
-                    throw new TooManyRequestError();
-                } else if (error.code === "auth/api-key-not-valid.-please-pass-a-valid-api-key.") {
-                    throw new WrongApiKeyError();
-                } else if (error.code === "auth/network-request-failed") {
-                    throw new OfflineError();
-                } else {
-                    console.error($localize`Unknown error code`, `"${error.code}"`);
-                }
+                throw this.catchErrors(error);
             });
+    }
+
+    catchErrors(error: { code: string }) {
+        if (error.code === "auth/invalid-email") {
+            return new InvalidEmailError();
+        } else if (error.code === "auth/wrong-password" || error.code === "auth/_user-not-found") {
+            return new WrongPasswordError();
+        } else if (error.code === "auth/too-many-requests") {
+            return new TooManyRequestError();
+        } else if (error.code === "auth/api-key-not-valid.-please-pass-a-valid-api-key.") {
+            return new WrongApiKeyError();
+        } else if (error.code === "auth/network-request-failed") {
+            this.messageService.add({
+                severity: "error",
+                detail: `${$localize`You are offline`}`
+            });
+            return new OfflineError();
+        } else {
+            return new FirebaseAuthError(error);
+        }
     }
 
     sendLoginLink(email: string) {
@@ -178,9 +185,9 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         window.localStorage.setItem("loginWithProvider", "true");
         return signInWithRedirect(this.auth, new GoogleAuthProvider())
             .catch((error) => {
-                const customError = new FirebaseAuthError(error);
+                const customError = this.catchErrors(error);
                 this.loggerService.error(customError);
-                return Promise.reject(error);
+                return Promise.reject(customError);
             });
     }
 

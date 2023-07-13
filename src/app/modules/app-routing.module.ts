@@ -8,16 +8,19 @@ import {
     TitleStrategy,
     UrlTree
 } from "@angular/router";
-import {HomeComponent, LoginComponent} from "@components";
+import {LoginComponent, ShootingComponent} from "@components";
 import {AppService, UserService} from "@services";
 import {map, Observable} from "rxjs";
+import {shootingResolver} from "../services/shooting.service";
+import BaseComponent from "@base-component";
+import {ShootingsComponent} from "../components/pages/shootings/shootings.component";
 
 const logginInGuard: CanActivateFn = (): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree => {
     const userService = inject(UserService);
     const router = inject(Router);
     return userService.isLoggedIn().pipe(map(isLogged => {
         if (isLogged) {
-            void router.navigate(["/home"]);
+            void router.navigate(["/shooting"]);
         }
         return !isLogged;
     }));
@@ -34,7 +37,7 @@ const loggedInGuard: CanActivateFn = (): Observable<boolean | UrlTree> | Promise
 };
 
 const routes: Routes = [
-    {path: "", redirectTo: "home", pathMatch: "full"},
+    {path: "", redirectTo: "shooting", pathMatch: "full"},
     {
         path: "login",
         canActivate: [logginInGuard],
@@ -42,10 +45,24 @@ const routes: Routes = [
         title: "Login",
     },
     {
-        path: "home",
+        path: "shooting",
         canActivate: [],
-        component: HomeComponent,
-        title: "Home",
+        component: ShootingComponent,
+        title: "Shooting",
+    },
+    {
+        path: "shootings",
+        canActivate: [loggedInGuard],
+        component: ShootingsComponent,
+        title: "Shootings",
+    },
+    {
+        path: "shooting/:id",
+        canActivate: [loggedInGuard],
+        component: ShootingComponent,
+        canDeactivate: [(component: BaseComponent) => component.canDeactivate()],
+        resolve: {shooting: shootingResolver},
+        title: "Shootings",
     },
 ];
 

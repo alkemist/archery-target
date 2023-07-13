@@ -1,11 +1,11 @@
-import {ElementRef, Injectable, ViewContainerRef} from '@angular/core';
+import {ElementRef, Injectable, signal, ViewContainerRef} from '@angular/core';
 
 import 'hammerjs';
-import {ArrowInterface, CoordinateInterface, SizeInterface} from "@models";
+import {ArrowModel, CoordinateInterface, ShootingFormInterface, ShootingModel, SizeInterface} from "@models";
 import {MathHelper} from "@tools";
 import {ArrowComponent} from "@components";
 import {Subject} from "rxjs";
-import {ArrowModel} from "../models/archery/arrow.model";
+import {ShootingService} from "./shooting.service";
 
 
 @Injectable({
@@ -14,6 +14,10 @@ import {ArrowModel} from "../models/archery/arrow.model";
 export class MapBuilder {
     static TARGET_MARGIN = 200;
     static ERROR_MARGIN = 10;
+
+    modalOpened = signal(false);
+    mapShowed = signal(false);
+    isAdding = true;
 
     private _viewContainerRef?: ViewContainerRef;
     private _containerSize: SizeInterface = {w: 0, h: 0};
@@ -30,25 +34,35 @@ export class MapBuilder {
     private _hammerEnabled = true;
     private _isDragging = false;
     private _isZooming = false;
-    private _isAdding = true;
     private _targetElement?: HTMLImageElement;
-    private _arrowsChanged = new Subject<ArrowModel[]>();
+    private _shootingChanged = new Subject<ShootingModel>();
+    private _loaded = new Subject<boolean>();
     private _hammer?: HammerManager;
     private _pageElement?: HTMLElement;
     private _mapElement?: HTMLElement;
-    private _rayons: number[] = []
+    private _rayons: number[] = [];
+    private _shooting: ShootingModel | null = null;
 
-    private _arrows: ArrowModel[] = [];
+    constructor(
+        private shootingService: ShootingService
+    ) {
 
-    constructor() {
     }
 
-    set isAdding(isAdding: boolean) {
-        this._isAdding = isAdding;
+    get arrowsCount() {
+        return this.shooting?.arrows.length ?? 0
+    };
+
+    get onShootingChange$() {
+        return this._shootingChanged.asObservable();
     }
 
-    get onArrowsChange$() {
-        return this._arrowsChanged.asObservable();
+    get loaded$() {
+        return this._loaded.asObservable();
+    }
+
+    private get shooting(): ShootingModel {
+        return this._shooting as ShootingModel;
     }
 
     private get hammer(): HammerManager {
@@ -61,6 +75,10 @@ export class MapBuilder {
 
     private get mapElement(): HTMLElement {
         return this._mapElement as HTMLElement;
+    }
+
+    saveShooting() {
+        return this.shootingService.addOrUpdate(this.shooting);
     }
 
     reset() {
@@ -83,19 +101,21 @@ export class MapBuilder {
         this._isDragging = false;
         this._isZooming = false;
         this._rayons = [];
-        this._arrows = [];
+        this.mapShowed.set(false);
+
+        this.clear();
     }
 
     clear() {
-        this._arrows.forEach(() => {
+        this.shooting.arrows.forEach(() => {
             this._viewContainerRef?.remove(0);
-        })
-        this._arrows = [];
-        this._arrowsChanged.next(this._arrows);
+        });
+        this.shooting.arrows = [];
+        this._shootingChanged.next(this.shooting);
     }
 
-    build(arrows: ArrowInterface[]) {
-
+    build(arrows: ArrowModel[]) {
+        arrows.forEach(arrow => this.addArrow(arrow))
     }
 
     updateCurrentPosition(position: CoordinateInterface, offset?: SizeInterface) {
@@ -200,8 +220,8 @@ export class MapBuilder {
         });
 
         this.hammer.on('tap', (event) => {
-            if (this._isAdding) {
-                this.addArrow(event.center)
+            if (this.isAdding) {
+                this.addArrowByUser(event.center)
             } else if (event.target.nodeName === "NG-COMPONENT") {
                 this.removeArrowByPoint(event.center)
             }
@@ -237,16 +257,32 @@ export class MapBuilder {
     }
 
     removeArrowByIndex(index: number) {
-        const arrow = this._arrows[index];
+        const arrow = this.shooting.arrows[index];
         const viewRefIndex = this._viewContainerRef?.indexOf(arrow.viewRef);
 
         if (viewRefIndex !== undefined && viewRefIndex > -1) {
             this._viewContainerRef?.remove(viewRefIndex);
-            this._arrows.splice(index, 1);
-            this._arrowsChanged.next(this._arrows);
+            this.shooting.removeArrow(index)
+            this._shootingChanged.next(this.shooting);
         } else {
             throw new Error("Unknown arrow by index")
         }
+    }
+
+    updateShootingByForm(value: Partial<ShootingFormInterface>) {
+        if (value.date) {
+            this.shooting.date = value.date;
+            this.shooting.updateNameAndSlug();
+        }
+        if (value.distance) {
+            this.shooting.distance = value.distance;
+        }
+        this._shootingChanged.next(this.shooting);
+    }
+
+    updateShootingByQuery(shooting: ShootingModel) {
+        this._shooting = shooting;
+        this.build(shooting.arrows);
     }
 
     private checkPageStatus() {
@@ -269,6 +305,7 @@ export class MapBuilder {
 
                 this.updateValues();
             }, {passive: false});
+            this._loaded.next(true);
         }
     }
 
@@ -320,7 +357,7 @@ export class MapBuilder {
     }
 
     private placeArrow(point: CoordinateInterface): ArrowModel {
-        const position: ArrowInterface = this.removeOffset(point);
+        const position: CoordinateInterface = this.removeOffset(point);
 
         position.x -= this._mapPosition.x - MapBuilder.TARGET_MARGIN * this._scale / 2;
         position.x -= (this._containerSize.w - this._targetSize.w * this._scale) / 2
@@ -331,7 +368,18 @@ export class MapBuilder {
         position.x /= this._scale;
         position.y /= this._scale;
 
-        const arrow = new ArrowModel(position);
+        const componentOffset = ArrowComponent.size / 2;
+        const margin = MapBuilder.TARGET_MARGIN / 2
+
+        const arrow = new ArrowModel({
+            ...position,
+            x: position.x - componentOffset,
+            y: position.y - componentOffset,
+            center: {
+                x: position.x - margin,
+                y: position.y - margin
+            }
+        });
 
         arrow.score = this.calculScore(arrow)
         arrow.distance = MathHelper.round(MathHelper.flatDistance(arrow.center, this._targetCenter));
@@ -339,39 +387,44 @@ export class MapBuilder {
         return arrow;
     }
 
-    private addArrow(point: CoordinateInterface) {
+    private isInMap(arrow: ArrowModel) {
+        const totalDistance = arrow.distance + ArrowComponent.size - MapBuilder.TARGET_MARGIN;
+
+        return totalDistance <= (this._targetSize.w / 2)
+            && totalDistance <= (this._targetSize.h / 2);
+    }
+
+    private addArrowByUser(point: CoordinateInterface) {
         const arrow = this.placeArrow(point);
 
-        const isInMap =
-            arrow.x > 0 && arrow.y > 0
-            && (arrow.x + ArrowComponent.size) < this._targetSize.w + MapBuilder.TARGET_MARGIN
-            && (arrow.y + ArrowComponent.size) < this._targetSize.h + MapBuilder.TARGET_MARGIN
+        if (this.isInMap(arrow)) {
+            this.addArrow(arrow);
+            this.shooting.addArrow(arrow)
+            this._shootingChanged.next(this.shooting);
+        }
 
-        if (isInMap) {
-            const componentRef = this._viewContainerRef?.createComponent(ArrowComponent);
-            if (componentRef) {
-                arrow.viewRef = componentRef.hostView;
+        return arrow;
+    }
 
-                const componentInstance = componentRef.instance;
+    private addArrow(arrow: ArrowModel) {
+        const componentRef = this._viewContainerRef?.createComponent(ArrowComponent);
 
-                componentInstance.setPosition(arrow);
+        if (componentRef) {
+            arrow.viewRef = componentRef.hostView;
 
-                this._arrows.push(arrow);
-                this._arrows = this._arrows
-                    .sort((arrow1, arrow2) => arrow1.distance - arrow2.distance)
+            const componentInstance = componentRef.instance;
 
-                this._arrowsChanged.next(this._arrows);
-            }
+            componentInstance.setPosition(arrow.forComponent());
         }
     }
 
     private removeArrowByPoint(point: CoordinateInterface) {
         const arrowPoint = this.placeArrow(point);
-        const index = this._arrows.findIndex(arrow => arrow.hasPoint(arrowPoint))
+        const index = this.shooting.arrows.findIndex(arrow => arrow.hasPoint(arrowPoint))
 
         if (index > -1) {
             this.removeArrowByIndex(index);
-            this._arrowsChanged.next(this._arrows);
+            this._shootingChanged.next(this.shooting);
         } else {
             throw new Error("Unknown arrow by point")
         }

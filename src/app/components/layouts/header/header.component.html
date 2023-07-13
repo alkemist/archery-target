@@ -13,38 +13,46 @@
     <!-- End Toolbar Left -->
 
     <!-- Begin Toolbar Middle -->
-    <div class="filter-name flex flex-row align-items-center">
-
+    <div *ngIf="mapBuilder.mapShowed()" class="filter-name flex flex-row align-items-center  gap-2">
+        <span>{{ shooting()?.name }}</span>
+        <span *ngIf="shooting()?.distance"> - {{ shooting()?.distance }} m</span>
     </div>
     <!-- End Toolbar Middle -->
 
     <!-- Begin Toolbar Right -->
     <div class="p-toolbar-group-right">
-        <div *ngIf="hasArrows()" class="flex align-items-center justify-content-end gap-2">
+        <div *ngIf="hasArrows()" class="flex align-items-center gap-2">
             <p-toggleButton [formControl]="deleteModeControl"
                             offIcon="fa fa-trash"
                             onIcon="fa fa-trash"
                             styleClass="p-button-rounded p-button-danger"></p-toggleButton>
-            <p-button (click)="sidebarShowed = true" [label]="totalScore() + ' pts'"
-                      styleClass="p-button-rounded"></p-button>
+            <p-button (onClick)="sidebarShowed = true"
+                      [label]="shooting()?.score + ' pts / ' + mapBuilder.arrowsCount"
+                      icon="pi pi-chevron-right" iconPos="right" styleClass="p-button-rounded"></p-button>
         </div>
 
         <!-- Begin Sidebar -->
         <p-sidebar [(visible)]="sidebarShowed" [fullScreen]="false" position="right" styleClass="w-14rem">
-            <ng-template pTemplate="header">{{ arrows().length }} sorted arrows</ng-template>
+            <ng-template pTemplate="header">{{ mapBuilder.arrowsCount }} sorted arrows</ng-template>
             <ng-template pTemplate="content">
-                <div *ngFor="let arrow of arrows(); let i = index"
+                <div *ngFor="let arrow of shooting()?.arrows; let i = index"
                      class="flex justify-content-between flex-wrap align-items-center gap-4">
                     <div class="flex align-items-center gap-4">
                         <div [class]="'score_' + arrow.score" [style.background]="arrow.color" class="dot"></div>
                         <div>{{ arrow.score }} pts</div>
                     </div>
-                    <p-button (click)="mapBuilder.removeArrowByIndex(i)" icon="pi pi-trash"
+                    <p-button (onClick)="mapBuilder.removeArrowByIndex(i)" icon="pi pi-trash"
                               styleClass="p-button-rounded p-button-text"></p-button>
                 </div>
             </ng-template>
             <ng-template pTemplate="footer">
-                <p-button (click)="removeAllArrows()" icon="pi pi-trash p-button-danger" label="Remove all"></p-button>
+                <div class="flex flex-column align-items-center gap-2">
+                    <p-button (onClick)="removeAllArrows()" class="w-full" icon="pi pi-trash" label="Remove all"
+                              styleClass="p-button-danger w-full"></p-button>
+                    <p-button (onClick)="submitShooting()" *ngIf="logged()" class="w-full" icon="pi pi-check"
+                              label="Save"
+                              styleClass="p-button-success w-full"></p-button>
+                </div>
             </ng-template>
         </p-sidebar>
         <!-- End Sidebar -->

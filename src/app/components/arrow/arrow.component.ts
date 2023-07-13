@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, HostBinding} from "@angular/core";
 import BaseComponent from "@base-component";
-import {ArrowModel} from "../../models/archery/arrow.model";
+import {ArrowComponentInterface} from "@models";
 
 @Component({
     template: `
@@ -24,7 +24,7 @@ export class ArrowComponent extends BaseComponent {
         super();
     }
 
-    setPosition(arrow: ArrowModel) {
+    setPosition(arrow: ArrowComponentInterface) {
         this.x = arrow.x + "px";
         this.y = arrow.y + "px";
 

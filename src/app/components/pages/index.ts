@@ -1,2 +1,2 @@
-export * from './home/home.component';
+export * from './shooting/shooting.component';
 export * from './login/login.component';

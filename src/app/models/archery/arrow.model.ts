@@ -1,8 +1,8 @@
-import {ArrowInterface, CoordinateInterface} from "@models";
+import {ArrowComponentInterface, ArrowInterface, CoordinateInterface} from "@models";
 import {ArrowComponent} from "@components";
-import {MapBuilder} from "../../services/map.builder";
 import {ViewRef} from "@angular/core";
-import {ColorInterface, StyleHelper} from "../../tools/style.helper";
+import {ColorInterface, StyleHelper} from "@tools";
+import {PointModel} from "./point.model";
 
 export class ArrowModel {
     static COLORS: { color: ColorInterface, bgOffset: ColorInterface, fontColor: string }[] = [
@@ -19,8 +19,8 @@ export class ArrowModel {
         {color: {r: 255, g: 245, b: 53}, bgOffset: {r: -150, g: -150, b: -53, a: 0.4}, fontColor: 'white'},// 10 - yellow
     ];
 
-    private readonly _x: number;
-    private readonly _y: number;
+    private _x: number;
+    private _y: number;
     private _score: number = 0;
     private _distance: number = 0;
     private _viewRef?: ViewRef;
@@ -28,34 +28,48 @@ export class ArrowModel {
     private _bgColor: string = '';
     private _fontColor: string = '';
 
-    private readonly _center: CoordinateInterface = {
-        x: 0,
-        y: 0
-    }
+    private _center: PointModel = new PointModel(0, 0);
 
     constructor(data: ArrowInterface) {
-        const componentOffset = ArrowComponent.size / 2;
-        const margin = MapBuilder.TARGET_MARGIN / 2
+        this._x = data.x;
+        this._y = data.y;
 
-        this._center = {
-            x: data.x - margin,
-            y: data.y - margin
+        if (data.center) {
+            this._center = new PointModel(data.center.x, data.center.y);
         }
 
-        this._x = data.x - componentOffset;
-        this._y = data.y - componentOffset;
+        if (data.score) {
+            this.score = data.score;
+        }
+
+        if (data.distance) {
+            this._distance = data.distance;
+        }
     }
 
     get x(): number {
         return this._x;
     }
 
+    set x(value: number) {
+        this._x = value;
+    }
+
     get y(): number {
         return this._y;
     }
 
+    set y(value: number) {
+        this._y = value;
+    }
+
     get center(): CoordinateInterface {
         return this._center;
+    }
+
+    set center(value: CoordinateInterface) {
+        this._center.x = value.x;
+        this._center.y = value.y;
     }
 
     get score(): number {
@@ -109,5 +123,34 @@ export class ArrowModel {
             && point.center.x <= this.center.x + ArrowComponent.size / 2
             && point.center.y >= this.center.y - ArrowComponent.size / 2
             && point.center.y <= this.center.y + ArrowComponent.size / 2;
+    }
+
+    toFirestore(): ArrowInterface {
+        return {
+            score: this._score,
+            distance: this._distance,
+            x: this._x,
+            y: this._y,
+            center: this._center.toJson()
+        }
+    }
+
+    toForm(): ArrowInterface {
+        return {
+            score: this._score,
+            distance: this._distance,
+            x: this._x,
+            y: this._y,
+            center: this._center.toJson()
+        }
+    }
+
+    forComponent(): ArrowComponentInterface {
+        return {
+            x: this._x,
+            y: this._y,
+            fontColor: this._fontColor,
+            bgColor: this._bgColor,
+        }
     }
 }

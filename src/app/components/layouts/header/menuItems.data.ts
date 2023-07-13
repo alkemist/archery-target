@@ -9,8 +9,8 @@ interface DataModelMenuItem extends MenuItem {
 export const BaseMenuItems: MenuItem[] = [
     {
         label: $localize`Home`,
-        icon: 'pi pi-home',
-        routerLink: ['/home'],
+        icon: 'pi pi-shooting',
+        routerLink: ['/shooting'],
     },
     {
         separator: true
@@ -21,8 +21,8 @@ export const DataModelMenuItems: DataModelMenuItem[] = [
     {
         label: $localize`Shootings`,
         service: 'shooting',
-        addRouterLink: ['/home/shootings/add'],
-        listRouterLink: ['/home/shootings'],
+        addRouterLink: ['/', 'shooting'],
+        listRouterLink: ['/', 'shootings'],
     },
 ]
 

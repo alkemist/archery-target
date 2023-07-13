@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@alkemist/compare-engine@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@alkemist/compare-engine/-/compare-engine-1.2.3.tgz#14cc86ea7b3458cbbecec6bd87378a28b35fcb13"
+  integrity sha512-YJuK914hWsh1nb/hsKKkULyAHV+F7bx8gpf7+FW34PIMKSf2V7jHWR1YcA81b9C6qJenl8UlKx3C23dUz6a/qA==
+
 "@ampproject/remapping@2.2.1", "@ampproject/remapping@^2.2.0":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@ampproject/remapping/-/remapping-2.2.1.tgz#99e8e11851128b8702cd57c33684f1d0f260b630"

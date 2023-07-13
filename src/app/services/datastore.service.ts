@@ -127,6 +127,14 @@ export abstract class DatastoreService<
         return documentStored;
     }
 
+    async addOrUpdate(document: M): Promise<I> {
+        if (document.id) {
+            return this.update(document)
+        } else {
+            return this.add(document);
+        }
+    }
+
     async remove(document: HasIdWithInterface<M>): Promise<void> {
         await super.removeOne(document);
         this.invalidLocalData();

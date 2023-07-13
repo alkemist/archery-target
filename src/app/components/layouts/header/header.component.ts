@@ -3,14 +3,15 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {map, Subject} from "rxjs";
 import {Title} from "@angular/platform-browser";
 import {AppService, UserService} from "@services";
-import {ConfirmationService, MenuItem} from "primeng/api";
-import {BaseMenuItems} from "./menuItems.data";
+import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
+import {BaseMenuItems, DataModelMenuItems, LoginMenuItem, LogoutMenuItem} from "./menuItems.data";
 import {default as NoSleep} from "nosleep.js";
 import BaseComponent from "@base-component";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {FormControl} from "@angular/forms";
 import {MapBuilder} from "../../../services/map.builder";
-import {ArrowModel} from "../../../models/archery/arrow.model";
+import {ShootingModel} from "@models";
+import {ShootingService} from "../../../services/shooting.service";
 
 
 @Component({
@@ -22,17 +23,14 @@ import {ArrowModel} from "../../../models/archery/arrow.model";
 export class HeaderComponent extends BaseComponent {
     loading = signal(false);
     logged = signal(false);
-    arrows = signal<ArrowModel[]>([]);
-    totalScore = computed(() =>
-        this.arrows().reduce((total, arrow) => total + arrow.score, 0)
-    );
-    hasArrows = computed(() =>
-        this.arrows().length > 0
-    );
+    shooting = signal<ShootingModel | null>(null);
+    hasArrows = computed(() => {
+        const shooting = this.shooting()
+        return shooting ? shooting.arrows.length > 0 : false
+    });
 
     title;
-    menuItems: MenuItem[] = BaseMenuItems;
-    notLoggedMenuItems: MenuItem[] = [...BaseMenuItems];
+    menuItems: MenuItem[] = [...BaseMenuItems];
     services: Record<string, any> = {};
     noSleep = new NoSleep();
     appIsVisible$ = new Subject<boolean>();
@@ -47,9 +45,12 @@ export class HeaderComponent extends BaseComponent {
         private route: ActivatedRoute,
         private appService: AppService,
         private userService: UserService,
+        private shootingService: ShootingService,
+        private messageService: MessageService,
         private confirmationService: ConfirmationService,
     ) {
         super();
+        this.services["shooting"] = this.shootingService;
 
         this.title = toSignal(router.events.pipe(
             map(_ => titleService.getTitle().replaceAll("-", "/"))
@@ -67,11 +68,11 @@ export class HeaderComponent extends BaseComponent {
                 this.buildMenu();
             });
 
-        this.mapBuilder.onArrowsChange$
+        this.mapBuilder.onShootingChange$
             .pipe(takeUntilDestroyed())
-            .subscribe((arrows) => {
-                this.arrows.set(arrows);
-                if (arrows.length === 0) {
+            .subscribe((shooting) => {
+                this.shooting.set(shooting);
+                if (shooting.arrows.length === 0) {
                     if (this.deleteModeControl.value) {
                         this.deleteModeControl.setValue(false);
                     }
@@ -92,7 +93,7 @@ export class HeaderComponent extends BaseComponent {
         this.menuItems = [...BaseMenuItems];
 
         if (this.logged()) {
-            /*DataModelMenuItems.forEach((menuItem) => {
+            DataModelMenuItems.forEach((menuItem) => {
                 this.menuItems.push({
                     ...menuItem, items: [
                         {
@@ -115,11 +116,11 @@ export class HeaderComponent extends BaseComponent {
                         }
                     ],
                 });
-            });*/
+            });
         }
 
         if (this.logged()) {
-            /*this.menuItems.push({
+            this.menuItems.push({
                 separator: true
             });
 
@@ -127,9 +128,9 @@ export class HeaderComponent extends BaseComponent {
                 ...LogoutMenuItem, command: () => {
                     void this.userService.logout();
                 }
-            });*/
+            });
         } else {
-            //this.menuItems.push(LoginMenuItem)
+            this.menuItems.push(LoginMenuItem)
         }
     }
 
@@ -141,5 +142,15 @@ export class HeaderComponent extends BaseComponent {
                 this.mapBuilder.clear();
             }
         });
+    }
+
+    submitShooting() {
+        const isNew = !this.shooting()?.id;
+
+        this.mapBuilder.saveShooting().then((shootingStored) => {
+            if (isNew) {
+                void this.router.navigate(['shooting', shootingStored.id]);
+            }
+        })
     }
 }

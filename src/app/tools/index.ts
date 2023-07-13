@@ -7,4 +7,5 @@ export * from './generate-pushid';
 export * from './math.helper';
 export * from './object.helper';
 export * from './slugify';
+export * from './style.helper';
 export * from './time.helper';
