@@ -197,12 +197,6 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
 
     private getUser(userFirebase: User) {
         return this.findOneById(userFirebase.uid).then((dataUser) => {
-            if (!dataUser) {
-                this._isLoggedIn.next(false);
-                this.loggerService.error(new UserNotExistError());
-                return;
-            }
-
             if (
                 window.localStorage.getItem("emailForSignIn")
                 || window.localStorage.getItem("loginWithProvider")
@@ -218,6 +212,13 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
 
             this._user = new UserModel(dataUser);
             this._isLoggedIn.next(true);
+        }).catch(() => {
+            this.messageService.add({
+                severity: "error",
+                detail: `${$localize`You are not authorized to use this application`}`
+            });
+            this._isLoggedIn.next(false);
+            this.loggerService.error(new UserNotExistError());
         });
     }
 }

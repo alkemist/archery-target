@@ -17,7 +17,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FormControl, FormGroup} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ShootingModel} from "@models";
-import {combineLatest} from "rxjs";
+import {combineLatest, shareReplay} from "rxjs";
 import {UserService} from "@services";
 import {CompareHelper} from "@alkemist/compare-engine";
 
@@ -64,7 +64,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         this.mapBuilder.mapShowed.set(true);
 
         this.userService.isLoggedIn()
-            .pipe(takeUntilDestroyed())
+            .pipe(takeUntilDestroyed(), shareReplay({refCount: true, bufferSize: 1}))
             .subscribe((logged) => {
                 this.logged.set(logged);
             });

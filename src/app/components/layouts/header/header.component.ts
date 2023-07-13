@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, signal} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
-import {map, Subject} from "rxjs";
+import {map, shareReplay, Subject} from "rxjs";
 import {Title} from "@angular/platform-browser";
 import {AppService, UserService} from "@services";
 import {ConfirmationService, MenuItem, MessageService} from "primeng/api";
@@ -61,7 +61,7 @@ export class HeaderComponent extends BaseComponent {
         });
 
         this.userService.isLoggedIn()
-            .pipe(takeUntilDestroyed())
+            .pipe(takeUntilDestroyed(), shareReplay({refCount: true, bufferSize: 1}))
             .subscribe((logged) => {
                 this.logged.set(logged);
                 this.loading.set(false);
