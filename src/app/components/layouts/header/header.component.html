@@ -6,14 +6,14 @@
         <button (click)="menuEl.toggle($event)" *ngIf="!loading()" class="p-button-rounded p-button-text"
                 icon="pi pi-align-justify" pButton pRipple
                 type="button"></button>
-        <span class="header__logo">
+        <span *ngIf="!mapBuilder.mapShowed()" class="header__logo">
           {{ title() }}
         </span>
     </div>
     <!-- End Toolbar Left -->
 
     <!-- Begin Toolbar Middle -->
-    <div *ngIf="mapBuilder.mapShowed()" class="filter-name flex flex-row align-items-center  gap-2">
+    <div *ngIf="mapBuilder.mapShowed() && logged()" class="filter-name flex flex-row align-items-center  gap-2">
         <span>{{ shooting()?.name }}</span>
         <span *ngIf="shooting()?.distance"> - {{ shooting()?.distance }} m</span>
     </div>
@@ -27,7 +27,7 @@
                             onIcon="fa fa-trash"
                             styleClass="p-button-rounded p-button-danger"></p-toggleButton>
             <p-button (onClick)="sidebarShowed = true"
-                      [label]="shooting()?.score + ' pts / ' + mapBuilder.arrowsCount"
+                      [label]="shooting()?.score + ' pts / ' + shooting()?.groupingScore + '% / ' + mapBuilder.arrowsCount"
                       icon="pi pi-chevron-right" iconPos="right" styleClass="p-button-rounded"></p-button>
         </div>
 

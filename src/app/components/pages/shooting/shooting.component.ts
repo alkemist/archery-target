@@ -45,11 +45,13 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
     margin = MapBuilder.TARGET_MARGIN + 'px'
 
     shootingForm = new FormGroup<{
-        date: FormControl<Date | null>
-        distance: FormControl<number | null>
+        date: FormControl<Date | null>,
+        distance: FormControl<number | null>,
+        target: FormControl<number | null>
     }>({
         date: new FormControl<Date>(new Date()),
         distance: new FormControl<number | null>(null),
+        target: new FormControl<number | null>(null),
     });
 
     constructor(

@@ -36,6 +36,10 @@
             <label class="mb-2 block font-bold">Distance</label>
             <p-inputNumber [min]="0" formControlName="distance" suffix=" m"></p-inputNumber>
         </div>
+        <div class="flex-auto">
+            <label class="mb-2 block font-bold">Target</label>
+            <p-inputNumber [min]="0" formControlName="target" suffix=" cm"></p-inputNumber>
+        </div>
         <p-button (onClick)="submitShooting()" [disabled]="mapBuilder.arrowsCount === 0"
                   class="w-full"
                   icon="pi pi-check"

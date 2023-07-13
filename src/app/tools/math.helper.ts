@@ -27,15 +27,29 @@ export class MathHelper {
         return dist_points <= Math.pow(r, 2);
     }
 
+    static center(points: CoordinateInterface[]) {
+        if (points.length < 2) {
+            return null;
+        }
+
+        const total = points.reduce((total, point) => ({
+            x: MathHelper.round(total.x + point.x),
+            y: MathHelper.round(total.y + point.y)
+        }), {x: 0, y: 0})
+        return {
+            x: MathHelper.round(total.x / points.length),
+            y: MathHelper.round(total.y / points.length)
+        }
+    }
+
     /**
      * @param lat1
      * @param lon1
      * @param lat2
      * @param lon2
-     * @param unit 'M' is statute miles (default), 'K' is kilometers, 'N' is nautical miles
      * https://www.movable-type.co.uk/scripts/latlong.html
      */
-    static distance(lat1: number, lon1: number, lat2: number, lon2: number, unit = "K") {
+    static distance(lat1: number, lon1: number, lat2: number, lon2: number) {
         const R = 6371e3; // metres
         const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
         const φ2 = lat2 * Math.PI / 180;

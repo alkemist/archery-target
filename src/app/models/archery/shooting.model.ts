@@ -1,5 +1,6 @@
 import {
     ArrowModel,
+    CoordinateInterface,
     DocumentModel,
     HasIdInterface,
     ShootingBackInterface,
@@ -7,12 +8,15 @@ import {
     ShootingFrontInterface,
     ShootingStoredInterface
 } from "@models";
-import {slugify} from "@tools";
+import {MathHelper, slugify} from "@tools";
 
 export class ShootingModel extends DocumentModel implements HasIdInterface {
     private _date: Date;
     private _distance: number;
+    private _target: number;
     private _score: number;
+    private _groupingScore: number;
+    private _center: CoordinateInterface | null = null;
     private _arrows: ArrowModel[];
 
     constructor(shooting?: Partial<ShootingFrontInterface> | ShootingStoredInterface) {
@@ -28,7 +32,9 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
             id: shooting && shooting.id ? shooting.id : '',
             date: date,
             distance: shooting && shooting.distance ? shooting.distance : 0,
+            target: shooting && shooting.target ? shooting.target : 0,
             score: shooting && shooting.score ? shooting.score : 0,
+            groupingScore: shooting && shooting.groupingScore ? shooting.groupingScore : 0,
             arrows: arrows
         }
 
@@ -36,10 +42,10 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
 
         this._date = shootingData.date;
         this._distance = shootingData.distance;
+        this._target = shootingData.target;
         this._score = shootingData.score;
+        this._groupingScore = shootingData.groupingScore;
         this._arrows = shootingData.arrows;
-        this.updateScore();
-        this.updateNameAndSlug();
     }
 
     get date(): Date {
@@ -58,12 +64,36 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
         this._distance = distance;
     }
 
+    get target(): number {
+        return this._target;
+    }
+
+    set target(target: number) {
+        this._target = target;
+    }
+
     get score(): number {
         return this._score;
     }
 
     set score(score: number) {
         this._score = score;
+    }
+
+    get groupingScore(): number {
+        return this._groupingScore;
+    }
+
+    set groupingScore(groupingScore: number) {
+        this._groupingScore = groupingScore;
+    }
+
+    get center(): CoordinateInterface | null {
+        return this._center;
+    }
+
+    set center(center: CoordinateInterface | null) {
+        this._center = center;
     }
 
     get arrows(): ArrowModel[] {
@@ -77,16 +107,22 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
     addArrow(arrow: ArrowModel) {
         this._arrows.push(arrow);
         this.sortArrows();
-        this.updateScore();
+        this._score = this.calculScore();
+        this._center = this.calculCenter();
     }
 
     removeArrow(index: number) {
         this._arrows.splice(index, 1);
-        this.updateScore();
+        this._score = this.calculScore();
+        this._center = this.calculCenter();
     }
 
-    updateScore() {
-        this._score = this._arrows.reduce((score, arrow) => score + arrow.score, 0)
+    calculScore() {
+        return this._arrows.reduce((score, arrow) => score + arrow.score, 0);
+    }
+
+    calculCenter(): CoordinateInterface | null {
+        return MathHelper.center(this._arrows.map(arrow => arrow.center))
     }
 
     sortArrows() {
@@ -99,7 +135,10 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
             ...super.toFirestore(),
             dateSeconds: this._date.getTime(),
             distance: this._distance,
+            target: this._target,
             score: this._score,
+            groupingScore: this._groupingScore,
+            center: this._center,
             arrows: this._arrows.map(arrow => arrow.toFirestore()),
         }
     }
@@ -108,6 +147,7 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
         return {
             date: this._date,
             distance: this._distance,
+            target: this._target,
         };
     }
 

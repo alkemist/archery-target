@@ -7,7 +7,9 @@
             <tr>
                 <th i18n>Date</th>
                 <th i18n>Distance</th>
+                <th i18n>Target</th>
                 <th i18n>Score</th>
+                <th i18n>Group</th>
                 <th i18n>Arrows</th>
                 <th>
                 </th>
@@ -28,7 +30,21 @@
                     </p-columnFilter>
                 </th>
                 <th>
+                    <p-columnFilter field="target" matchMode="contains">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
                     <p-columnFilter field="score" matchMode="contains">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter field="groupingScore" matchMode="contains">
                         <ng-template let-filter="filterCallback" let-value pTemplate="filter">
                             <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
                         </ng-template>
@@ -59,7 +75,13 @@
                     {{toShootingModel(shooting).distance}}
                 </td>
                 <td>
+                    {{toShootingModel(shooting).target}}
+                </td>
+                <td>
                     {{toShootingModel(shooting).score}}
+                </td>
+                <td>
+                    {{toShootingModel(shooting).groupingScore}}
                 </td>
                 <td>
                     {{toShootingModel(shooting).arrows.length}}

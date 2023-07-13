@@ -16,7 +16,8 @@ export class ArrowComponent extends BaseComponent {
     @HostBinding("style.top") y = "0px";
     @HostBinding("style.width") w = `${ArrowComponent.size}px`;
     @HostBinding("style.height") h = `${ArrowComponent.size}px`;
-    @HostBinding("style.borderRadius") z = `${ArrowComponent.size}px`;
+    @HostBinding("style.borderRadius") r = `${ArrowComponent.size}px`;
+    @HostBinding("style.fontSize") f = `${ArrowComponent.size}px`;
     @HostBinding("style.backgroundColor") bgColor = "";
     @HostBinding("style.color") color = "";
 

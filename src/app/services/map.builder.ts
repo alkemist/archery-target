@@ -1,4 +1,4 @@
-import {ElementRef, Injectable, signal, ViewContainerRef} from '@angular/core';
+import {ComponentRef, ElementRef, Injectable, signal, ViewContainerRef} from '@angular/core';
 
 import 'hammerjs';
 import {ArrowModel, CoordinateInterface, ShootingFormInterface, ShootingModel, SizeInterface} from "@models";
@@ -6,12 +6,17 @@ import {MathHelper} from "@tools";
 import {ArrowComponent} from "@components";
 import {Subject} from "rxjs";
 import {ShootingService} from "./shooting.service";
+import {CompareHelper} from "@alkemist/compare-engine";
+import {CenterComponent} from "../components/center/center.component";
 
 
 @Injectable({
     providedIn: 'root'
 })
 export class MapBuilder {
+    // @TODO Sauvegarder les paramètres viseurs
+    // @TODO Determiner le reglage du viseur optimal
+    
     static TARGET_MARGIN = 200;
     static ERROR_MARGIN = 10;
 
@@ -27,6 +32,7 @@ export class MapBuilder {
     private _scale: number = 1;
     private _scaleMin: number = 1;
     private _scaleMax: number = 1;
+    private _shootingCenterMaxDistance = 0;
     private _rangeMin: CoordinateInterface = {x: 0, y: 0};
     private _rangeMax: CoordinateInterface = {x: 0, y: 0};
     private _currentMapPosition: CoordinateInterface = {x: 0, y: 0};
@@ -42,6 +48,7 @@ export class MapBuilder {
     private _mapElement?: HTMLElement;
     private _rayons: number[] = [];
     private _shooting: ShootingModel | null = null;
+    private _shootingCenterViewRef?: ComponentRef<CenterComponent>;
 
     constructor(
         private shootingService: ShootingService
@@ -82,7 +89,6 @@ export class MapBuilder {
     }
 
     reset() {
-        this._viewContainerRef = undefined;
         this._mapElement = undefined;
         this._pageElement = undefined;
         this._hammer = undefined;
@@ -102,6 +108,8 @@ export class MapBuilder {
         this._isZooming = false;
         this._rayons = [];
         this.mapShowed.set(false);
+        this._viewContainerRef = undefined;
+        this._shootingCenterViewRef = undefined;
 
         this.clear();
     }
@@ -111,11 +119,44 @@ export class MapBuilder {
             this._viewContainerRef?.remove(0);
         });
         this.shooting.arrows = [];
+        this.updateShootingCenter();
         this._shootingChanged.next(this.shooting);
     }
 
     build(arrows: ArrowModel[]) {
-        arrows.forEach(arrow => this.addArrow(arrow))
+        arrows.forEach(arrow => this.addArrow(arrow));
+        this.updateShootingCenter();
+    }
+
+    updateShootingCenter() {
+        const shootingCenter = this.shooting.calculCenter();
+
+        if (CompareHelper.isEvaluable(shootingCenter)) {
+            let shootingCenterDistance = this.shooting.arrows
+                .reduce((shootingCenterDistance, arrow) =>
+                    shootingCenterDistance + MathHelper.flatDistance(arrow.center, shootingCenter), 0);
+            shootingCenterDistance = MathHelper.round(shootingCenterDistance / this.shooting.arrows.length);
+
+            this.shooting.groupingScore = Math.max(0,
+                MathHelper.round(100 - (shootingCenterDistance / this._shootingCenterMaxDistance * 100), 0)
+            );
+
+            if (!this._shootingCenterViewRef) {
+                this._shootingCenterViewRef = this._viewContainerRef?.createComponent(CenterComponent);
+            }
+
+            this._shootingCenterViewRef?.instance.setPosition({
+                x: shootingCenter.x + MapBuilder.TARGET_MARGIN / 2 - CenterComponent.size / 2,
+                y: shootingCenter.y + MapBuilder.TARGET_MARGIN / 2 - CenterComponent.size / 2,
+            });
+        } else if (this._shootingCenterViewRef) {
+            this._viewContainerRef?.remove(
+                this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView)
+            );
+            this._shootingCenterViewRef = undefined;
+        }
+
+        this.shooting.center = shootingCenter;
     }
 
     updateCurrentPosition(position: CoordinateInterface, offset?: SizeInterface) {
@@ -139,8 +180,6 @@ export class MapBuilder {
         this._viewContainerRef = viewContainerRef;
         this._pageElement = pageRef.nativeElement;
         this._mapElement = mapRef.nativeElement;
-
-        this.checkPageStatus();
     }
 
 
@@ -222,7 +261,7 @@ export class MapBuilder {
         this.hammer.on('tap', (event) => {
             if (this.isAdding) {
                 this.addArrowByUser(event.center)
-            } else if (event.target.nodeName === "NG-COMPONENT") {
+            } else if (event.target.nodeName === "NG-COMPONENT" && event.target.innerHTML === " × ") {
                 this.removeArrowByPoint(event.center)
             }
         });
@@ -243,6 +282,7 @@ export class MapBuilder {
         this._targetSize.h = targetElement.naturalHeight + MapBuilder.TARGET_MARGIN;
         this._targetCenter.x = this._targetSize.w / 2;
         this._targetCenter.y = this._targetSize.h / 2;
+        this._shootingCenterMaxDistance = ((this._targetSize.w - MapBuilder.TARGET_MARGIN) / 2) - MapBuilder.ERROR_MARGIN;
 
         const rayon = MathHelper.round((this._targetSize.w - MapBuilder.TARGET_MARGIN) / 20)
         this._rayons = Array.from({length: 10}, (_, i) =>
@@ -262,7 +302,8 @@ export class MapBuilder {
 
         if (viewRefIndex !== undefined && viewRefIndex > -1) {
             this._viewContainerRef?.remove(viewRefIndex);
-            this.shooting.removeArrow(index)
+            this.shooting.removeArrow(index);
+            this.updateShootingCenter();
             this._shootingChanged.next(this.shooting);
         } else {
             throw new Error("Unknown arrow by index")
@@ -276,6 +317,9 @@ export class MapBuilder {
         }
         if (value.distance) {
             this.shooting.distance = value.distance;
+        }
+        if (value.target) {
+            this.shooting.target = value.target;
         }
         this._shootingChanged.next(this.shooting);
     }
@@ -369,15 +413,14 @@ export class MapBuilder {
         position.y /= this._scale;
 
         const componentOffset = ArrowComponent.size / 2;
-        const margin = MapBuilder.TARGET_MARGIN / 2
+        const targetOffset = MapBuilder.TARGET_MARGIN / 2
 
         const arrow = new ArrowModel({
-            ...position,
-            x: position.x - componentOffset,
-            y: position.y - componentOffset,
+            x: position.x - targetOffset,
+            y: position.y - targetOffset,
             center: {
-                x: position.x - margin,
-                y: position.y - margin
+                x: position.x - componentOffset,
+                y: position.y - componentOffset
             }
         });
 
@@ -399,11 +442,11 @@ export class MapBuilder {
 
         if (this.isInMap(arrow)) {
             this.addArrow(arrow);
-            this.shooting.addArrow(arrow)
+            this.shooting.addArrow(arrow);
+            this.updateShootingCenter();
             this._shootingChanged.next(this.shooting);
-        }
 
-        return arrow;
+        }
     }
 
     private addArrow(arrow: ArrowModel) {
@@ -424,6 +467,7 @@ export class MapBuilder {
 
         if (index > -1) {
             this.removeArrowByIndex(index);
+            this.updateShootingCenter();
             this._shootingChanged.next(this.shooting);
         } else {
             throw new Error("Unknown arrow by point")
