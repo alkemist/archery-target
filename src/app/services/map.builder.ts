@@ -115,8 +115,12 @@ export class MapBuilder {
     }
 
     clear() {
-        this.shooting.arrows.forEach(() => {
-            this._viewContainerRef?.remove(0);
+        this.shooting.arrows.forEach((arrow) => {
+            const viewRefIndex = this._viewContainerRef?.indexOf(arrow.viewRef);
+
+            if (viewRefIndex !== undefined && viewRefIndex > -1) {
+                this._viewContainerRef?.remove(viewRefIndex);
+            }
         });
         this.shooting.arrows = [];
         this.updateShootingCenter();
@@ -150,9 +154,12 @@ export class MapBuilder {
                 y: shootingCenter.y + MapBuilder.TARGET_MARGIN / 2 - CenterComponent.size / 2,
             });
         } else if (this._shootingCenterViewRef) {
-            this._viewContainerRef?.remove(
-                this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView)
-            );
+            const index = this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView);
+            if (index !== undefined && index > -1) {
+                this._viewContainerRef?.remove(
+                    this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView)
+                );
+            }
             this._shootingCenterViewRef = undefined;
         }
 
