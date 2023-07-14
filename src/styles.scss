@@ -98,16 +98,24 @@ p-inputNumber, p-autoComplete {
 
 .p-togglebutton.p-button {
   &.p-button-danger {
-    background: rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 0, 0.6);
     border: 3px solid white !important;
+
+    &:hover {
+      background: #000 !important;
+    }
 
     &:hover span, span {
       color: #EF4444 !important;
     }
 
     &.p-highlight {
-      background: #EF4444;
-      border: 1px solid #EF4444;
+      background: rgba(239, 68, 68, 0.8) !important;
+      border-color: #000 !important;
+
+      &.p-highlight:hover {
+        background: #EF4444 !important;
+      }
 
       span {
         color: #ffffff !important;
