@@ -20,6 +20,13 @@ export class ShootingsComponent extends BaseComponent {
     typeToken?: ShootingModel
     toShootingModel = CompareHelper.isT<ShootingModel>;
 
+    targets = [
+        40,
+        60,
+        80,
+        120
+    ]
+
     constructor(
         private shootingService: ShootingService,
         private confirmationService: ConfirmationService,

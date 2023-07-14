@@ -1,3 +1,9 @@
 .page-container__content {
   padding: 0;
 }
+
+p-table ::ng-deep {
+  .p-column-filter-clear-button {
+    display: none;
+  }
+}

@@ -7,75 +7,33 @@
              sortField="dateSeconds" styleClass="p-datatable-m">
         <ng-template pTemplate="header">
             <tr>
-                <th pSortableColumn="dateSeconds">
+                <th style="width: 10%;max-width:200px;"></th>
+                <th pSortableColumn="dateSeconds" style="min-width:100px">
                     <span i18n>Date</span>
                     <p-sortIcon field="dateSeconds"></p-sortIcon>
                 </th>
-                <th pSortableColumn="distance">
+                <th pSortableColumn="distance" style="min-width:130px">
                     <span i18n>Distance</span>
                     <p-sortIcon field="distance"></p-sortIcon>
                 </th>
-                <th pSortableColumn="target">
-                    <span i18n>Target</span>
-                    <p-sortIcon field="target"></p-sortIcon>
-                </th>
-                <th pSortableColumn="score">
+                <th pSortableColumn="score" style="min-width:110px">
                     <span i18n>Score</span>
                     <p-sortIcon field="score"></p-sortIcon>
                 </th>
-                <th pSortableColumn="groupingScore">
+                <th pSortableColumn="groupingScore" style="min-width:110px">
                     <span i18n>Group</span>
                     <p-sortIcon field="groupingScore"></p-sortIcon>
                 </th>
-                <th pSortableColumn="arrowCount">
+                <th pSortableColumn="arrowCount" style="min-width:120px">
                     <span i18n>Arrows</span>
                     <p-sortIcon field="arrowCount"></p-sortIcon>
                 </th>
-                <th></th>
+                <th pSortableColumn="target" style="min-width:130px">
+                    <span i18n>Target</span>
+                    <p-sortIcon field="target"></p-sortIcon>
+                </th>
             </tr>
             <tr>
-                <th>
-                    <p-columnFilter field="name" matchMode="contains">
-                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
-                        </ng-template>
-                    </p-columnFilter>
-                </th>
-                <th>
-                    <p-columnFilter field="distance" matchMode="contains">
-                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
-                        </ng-template>
-                    </p-columnFilter>
-                </th>
-                <th>
-                    <p-columnFilter field="target" matchMode="contains">
-                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
-                        </ng-template>
-                    </p-columnFilter>
-                </th>
-                <th>
-                    <p-columnFilter field="score" matchMode="contains">
-                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
-                        </ng-template>
-                    </p-columnFilter>
-                </th>
-                <th>
-                    <p-columnFilter field="groupingScore" matchMode="contains">
-                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
-                        </ng-template>
-                    </p-columnFilter>
-                </th>
-                <th>
-                    <p-columnFilter field="arrows" matchMode="contains">
-                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
-                        </ng-template>
-                    </p-columnFilter>
-                </th>
                 <th>
                     <a [routerLink]="['/', 'shooting']"
                        class="p-button-rounded p-button-success p-button-text"
@@ -83,28 +41,63 @@
                        pButton
                        pRipple></a>
                 </th>
+                <th>
+                    <p-columnFilter [showMenu]="false" field="name" matchMode="contains">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter [showMenu]="false" field="distance" matchMode="equals"
+                                    type="number">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <p-inputNumber (ngModelChange)="filter($event)" [min]="0" [ngModel]="value"></p-inputNumber>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter [showMenu]="false" field="score" matchMode="equals"
+                                    type="number">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <p-inputNumber (ngModelChange)="filter($event)" [min]="0" [ngModel]="value"></p-inputNumber>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter [showMenu]="false" field="groupingScore" matchMode="equals"
+                                    type="number">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <p-inputNumber (ngModelChange)="filter($event)" [max]="100" [min]="0"
+                                           [ngModel]="value"></p-inputNumber>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter [showMenu]="false" field="arrowCount" matchMode="equals"
+                                    type="number">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <p-inputNumber (ngModelChange)="filter($event)" [min]="1" [ngModel]="value"></p-inputNumber>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
+                <th>
+                    <p-columnFilter [showMenu]="false" field="target" matchMode="equals"
+                                    type="number">
+                        <ng-template let-filter="filterCallback" let-value pTemplate="filter">
+                            <p-dropdown (onChange)="filter($event.value)" [ngModel]="value" [options]="targets"
+                                        [showClear]="false" placeholder="Any">
+                                <ng-template let-option pTemplate="item">
+                                    {{ option }}
+                                </ng-template>
+                            </p-dropdown>
+                        </ng-template>
+                    </p-columnFilter>
+                </th>
             </tr>
         </ng-template>
         <ng-template let-shooting pTemplate="body">
             <tr>
-                <td>
-                    {{toShootingModel(shooting).name}}
-                </td>
-                <td>
-                    {{toShootingModel(shooting).distance}}
-                </td>
-                <td>
-                    {{toShootingModel(shooting).target}}
-                </td>
-                <td>
-                    {{toShootingModel(shooting).score}}
-                </td>
-                <td>
-                    {{toShootingModel(shooting).groupingScore}}
-                </td>
-                <td>
-                    {{toShootingModel(shooting).arrows.length}}
-                </td>
                 <td class="align-right">
                     <a [routerLink]="['/', 'shooting', shooting.id]"
                        class="p-button-rounded p-button-success p-button-text"
@@ -114,6 +107,24 @@
                     <p-button (onClick)="remove(shooting)"
                               icon="pi pi-trash"
                               styleClass="p-button-rounded p-button-danger p-button-text"></p-button>
+                </td>
+                <td>
+                    {{toShootingModel(shooting).name}}
+                </td>
+                <td>
+                    {{toShootingModel(shooting).distance}}
+                </td>
+                <td>
+                    {{toShootingModel(shooting).score}}
+                </td>
+                <td>
+                    {{toShootingModel(shooting).groupingScore}}
+                </td>
+                <td>
+                    {{toShootingModel(shooting).arrowCount}}
+                </td>
+                <td>
+                    {{toShootingModel(shooting).target}}
                 </td>
             </tr>
         </ng-template>
