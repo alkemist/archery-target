@@ -9,7 +9,7 @@
   "theme_color": "#040d19",
   "background_color": "#040d19",
   "display": "standalone",
-  "orientation": "any",
+  "orientation": "portrait",
   "related_applications": [],
   "prefer_related_applications": false,
   "protocol_handlers": [],
