@@ -53,6 +53,17 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
         this._arrows = shootingData.arrows;
     }
 
+    get description(): string {
+        let specifications = [];
+        if (this._distance) {
+            specifications.push(this._distance + 'm');
+        }
+        if (this._target) {
+            specifications.push(this._target + 'cm');
+        }
+        return specifications.join(" / ")
+    }
+
     get date(): Date {
         return this._date;
     }
