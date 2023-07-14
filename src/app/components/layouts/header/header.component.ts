@@ -8,7 +8,6 @@ import {BaseMenuItems, DataModelMenuItems, LoginMenuItem, LogoutMenuItem} from "
 import {default as NoSleep} from "nosleep.js";
 import BaseComponent from "@base-component";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {FormControl} from "@angular/forms";
 import {MapBuilder} from "../../../services/map.builder";
 import {ShootingModel} from "@models";
 import {ShootingService} from "../../../services/shooting.service";
@@ -23,6 +22,7 @@ import {ShootingService} from "../../../services/shooting.service";
 export class HeaderComponent extends BaseComponent {
     loading = signal(false);
     logged = signal(false);
+    sidebarShowed = signal(false);
     shooting = signal<ShootingModel | null>(null);
     hasArrows = computed(() => {
         const shooting = this.shooting()
@@ -34,9 +34,6 @@ export class HeaderComponent extends BaseComponent {
     services: Record<string, any> = {};
     noSleep = new NoSleep();
     appIsVisible$ = new Subject<boolean>();
-    sidebarShowed = false;
-
-    deleteModeControl = new FormControl<boolean>(false);
 
     constructor(
         titleService: Title,
@@ -73,19 +70,10 @@ export class HeaderComponent extends BaseComponent {
             .subscribe((shooting) => {
                 this.shooting.set(shooting);
                 if (shooting.arrows.length === 0) {
-                    if (this.deleteModeControl.value) {
-                        this.deleteModeControl.setValue(false);
-                    }
                     if (this.sidebarShowed) {
-                        this.sidebarShowed = false;
+                        this.sidebarShowed.set(false);
                     }
                 }
-            })
-
-        this.deleteModeControl.valueChanges
-            .pipe(takeUntilDestroyed())
-            .subscribe((editMode) => {
-                this.mapBuilder.isAdding = !editMode ?? true;
             })
     }
 
@@ -93,6 +81,14 @@ export class HeaderComponent extends BaseComponent {
         this.menuItems = [...BaseMenuItems];
 
         if (this.logged()) {
+            this.menuItems.push(
+                {
+                    label: $localize`Shootings`,
+                    icon: "pi pi-list",
+                    routerLink: ['/', 'shootings'],
+                }
+            );
+
             DataModelMenuItems.forEach((menuItem) => {
                 this.menuItems.push({
                     ...menuItem, items: [
@@ -148,6 +144,7 @@ export class HeaderComponent extends BaseComponent {
         const isNew = !this.shooting()?.id;
 
         this.mapBuilder.saveShooting().then((shootingStored) => {
+            this.sidebarShowed.set(false);
             if (isNew) {
                 void this.router.navigate(['shooting', shootingStored.id]);
             }

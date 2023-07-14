@@ -54,6 +54,8 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         target: new FormControl<number | null>(null),
     });
 
+    deleteModeControl = new FormControl<boolean>(false);
+
     constructor(
         private userService: UserService,
         public mapBuilder: MapBuilder,
@@ -75,7 +77,18 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
             .pipe(takeUntilDestroyed())
             .subscribe((shooting) => {
                 this.shooting.set(shooting);
+                if (shooting.arrows.length === 0) {
+                    if (this.deleteModeControl.value) {
+                        this.deleteModeControl.setValue(false);
+                    }
+                }
                 this.changeDetectorRef.detectChanges();
+            })
+
+        this.deleteModeControl.valueChanges
+            .pipe(takeUntilDestroyed())
+            .subscribe((editMode) => {
+                this.mapBuilder.isAdding = !editMode ?? true;
             })
 
         combineLatest([
@@ -148,6 +161,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         const isNew = !this.shooting()?.id;
 
         this.mapBuilder.saveShooting().then((shootingStored) => {
+            this.modalOpened = false;
             if (isNew) {
                 void this.router.navigate(['shooting', shootingStored.id]);
             }

@@ -3,7 +3,7 @@ import BaseComponent from "@base-component";
 import {ShootingService} from "../../../services/shooting.service";
 import {ShootingModel} from "@models";
 import {CompareHelper} from "@alkemist/compare-engine";
-import {ConfirmationService} from "primeng/api";
+import {ConfirmationService, SortEvent} from "primeng/api";
 
 
 @Component({
@@ -47,6 +47,25 @@ export class ShootingsComponent extends BaseComponent {
                     return this.loadShootings();
                 })
             }
+        });
+    }
+
+    customSort(event: SortEvent) {
+        event.data?.sort((data1, data2) => {
+            if (event.field && event.order) {
+                let value1 = data1[event.field];
+                let value2 = data2[event.field];
+                let result;
+
+                if (value1 == null && value2 != null) result = 1;
+                else if (value1 != null && value2 == null) result = -1;
+                else if (value1 == null && value2 == null) result = 0;
+                else if (typeof value1 === 'string' && typeof value2 === 'string') result = value1.localeCompare(value2);
+                else result = value1 < value2 ? 1 : value1 > value2 ? -1 : 0;
+
+                return event.order * result;
+            }
+            return 0;
         });
     }
 }

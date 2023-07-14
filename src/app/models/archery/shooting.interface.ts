@@ -12,7 +12,7 @@ export interface ShootingFrontInterface extends DocumentFrontInterface {
     distance: number,
     target: number,
     score: number,
-    groupingScore: number,
+    groupingScore: number | null,
     center: CoordinateInterface | null,
     arrows: ArrowInterface[]
 }

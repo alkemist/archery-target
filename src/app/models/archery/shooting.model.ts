@@ -9,19 +9,22 @@ import {
     ShootingStoredInterface
 } from "@models";
 import {MathHelper, slugify} from "@tools";
+import {CompareHelper} from "@alkemist/compare-engine";
 
 export class ShootingModel extends DocumentModel implements HasIdInterface {
+    private static REDUCE_SECONDS = 1000000;
     private _date: Date;
+    private readonly _dateSeconds: number;
     private _distance: number;
     private _target: number;
     private _score: number;
-    private _groupingScore: number;
+    private _groupingScore: number | null;
     private _center: CoordinateInterface | null = null;
     private _arrows: ArrowModel[];
 
     constructor(shooting?: Partial<ShootingFrontInterface> | ShootingStoredInterface) {
         const date = shooting && shooting.date ? shooting.date
-            : shooting && shooting.dateSeconds ? new Date(shooting.dateSeconds)
+            : shooting && shooting.dateSeconds ? new Date(shooting.dateSeconds * ShootingModel.REDUCE_SECONDS)
                 : new Date();
 
         const arrows = ((shooting && shooting.arrows) ? shooting.arrows : [])
@@ -29,18 +32,20 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
 
         const shootingData = {
             ...shooting,
-            id: shooting && shooting.id ? shooting.id : '',
+            id: shooting && CompareHelper.isEvaluable(shooting.id) ? shooting.id : '',
             date: date,
-            distance: shooting && shooting.distance ? shooting.distance : 0,
-            target: shooting && shooting.target ? shooting.target : 0,
-            score: shooting && shooting.score ? shooting.score : 0,
-            groupingScore: shooting && shooting.groupingScore ? shooting.groupingScore : 0,
+            dateSeconds: shooting && CompareHelper.isEvaluable(shooting.dateSeconds) ? shooting.dateSeconds : 0,
+            distance: shooting && CompareHelper.isEvaluable(shooting.distance) ? shooting.distance : 0,
+            target: shooting && CompareHelper.isEvaluable(shooting.target) ? shooting.target : 0,
+            score: shooting && CompareHelper.isEvaluable(shooting.score) ? shooting.score : 0,
+            groupingScore: shooting && CompareHelper.isEvaluable(shooting.groupingScore) ? shooting.groupingScore : null,
             arrows: arrows
         }
 
         super(shootingData as ShootingStoredInterface);
 
         this._date = shootingData.date;
+        this._dateSeconds = shootingData.dateSeconds;
         this._distance = shootingData.distance;
         this._target = shootingData.target;
         this._score = shootingData.score;
@@ -54,6 +59,10 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
 
     set date(date: Date) {
         this._date = date;
+    }
+
+    get dateSeconds(): number {
+        return this._dateSeconds;
     }
 
     get distance(): number {
@@ -80,12 +89,16 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
         this._score = score;
     }
 
-    get groupingScore(): number {
+    get groupingScore(): number | null {
         return this._groupingScore;
     }
 
-    set groupingScore(groupingScore: number) {
+    set groupingScore(groupingScore: number | null) {
         this._groupingScore = groupingScore;
+    }
+
+    get arrowCount(): number {
+        return this._arrows.length;
     }
 
     get center(): CoordinateInterface | null {
@@ -133,7 +146,7 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
     override toFirestore(): ShootingBackInterface {
         return {
             ...super.toFirestore(),
-            dateSeconds: this._date.getTime(),
+            dateSeconds: MathHelper.round(this._date.getTime() / ShootingModel.REDUCE_SECONDS, 0),
             distance: this._distance,
             target: this._target,
             score: this._score,

@@ -76,11 +76,18 @@ form {
   }
 }
 
-.float-button-right {
+.float-button-left, .float-button-right {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
   z-index: 100;
+  bottom: 20px;
+}
+
+.float-button-left {
+  left: 20px;
+}
+
+.float-button-right {
+  right: 20px;
 }
 
 p-inputNumber, p-autoComplete {

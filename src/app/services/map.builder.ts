@@ -153,15 +153,18 @@ export class MapBuilder {
                 x: shootingCenter.x + MapBuilder.TARGET_MARGIN / 2 - CenterComponent.size / 2,
                 y: shootingCenter.y + MapBuilder.TARGET_MARGIN / 2 - CenterComponent.size / 2,
             });
-        } else if (this._shootingCenterViewRef) {
-            const index = this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView);
-            if (index !== undefined && index > -1) {
-                this._viewContainerRef?.remove(
-                    this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView)
-                );
+        } else {
+            this.shooting.groupingScore = null;
+
+            if (this._shootingCenterViewRef) {
+                const index = this._viewContainerRef?.indexOf(this._shootingCenterViewRef.hostView);
+                if (index !== undefined && index > -1) {
+                    this._viewContainerRef?.remove(index);
+                }
+                this._shootingCenterViewRef = undefined;
             }
-            this._shootingCenterViewRef = undefined;
         }
+
 
         this.shooting.center = shootingCenter;
     }

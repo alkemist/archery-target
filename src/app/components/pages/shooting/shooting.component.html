@@ -1,5 +1,3 @@
-<p-button (onClick)="mapBuilder.modalOpened.set(true)" *ngIf="logged()" class="float-button-right"
-          icon="pi pi-pencil" styleClass="p-button-rounded"></p-button>
 <blockable #lockable class="page-container__content">
     <div #page [class.landscape]="isLandscape" id="page">
         <div #map [style.padding]="margin" id="map">
@@ -10,9 +8,25 @@
         </div>
     </div>
 </blockable>
+
+<div class="float-button-left flex align-items-center gap-3">
+    <p-button *ngIf="logged()" [routerLink]="['/', 'shootings']"
+              icon="pi pi-list" styleClass="p-button-rounded"></p-button>
+</div>
+<div class="float-button-right flex align-items-center gap-3">
+    <p-toggleButton *ngIf="mapBuilder.arrowsCount > 0" [formControl]="deleteModeControl"
+                    offIcon="fa fa-trash"
+                    onIcon="fa fa-trash"
+                    styleClass="p-button-rounded p-button-danger"></p-toggleButton>
+    <p-button (onClick)="mapBuilder.modalOpened.set(true)" *ngIf="logged()"
+              icon="pi pi-pencil" styleClass="p-button-rounded"></p-button>
+</div>
+
+
 <p-blockUI [blocked]="shootingLoading" [target]="lockable">
     <p-progressSpinner></p-progressSpinner>
 </p-blockUI>
+
 <p-confirmDialog #cd header="Confirmation" i18n-header icon="pi pi-exclamation-triangle" key="shooting">
     <p-footer>
         <button (click)="cd.reject()" i18n-label icon="pi pi-times" label="No" pButton

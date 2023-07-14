@@ -1,18 +1,37 @@
 <div class="page-container__content h-full">
-    <p-table #dt [loading]="loading()" [pageLinks]="2" [paginator]="true" [rows]="10"
-             [value]="shootings()" breakpoint="400px" dataKey="id"
+    <p-table #dt (sortFunction)="customSort($event)" [customSort]="true" [loading]="loading()"
+             [pageLinks]="2" [paginator]="true"
+             [rows]="10" [value]="shootings()"
+             breakpoint="400px" dataKey="id"
              responsiveLayout="scroll" scrollHeight="flex"
-             styleClass="p-datatable-m">
+             sortField="dateSeconds" styleClass="p-datatable-m">
         <ng-template pTemplate="header">
             <tr>
-                <th i18n>Date</th>
-                <th i18n>Distance</th>
-                <th i18n>Target</th>
-                <th i18n>Score</th>
-                <th i18n>Group</th>
-                <th i18n>Arrows</th>
-                <th>
+                <th pSortableColumn="dateSeconds">
+                    <span i18n>Date</span>
+                    <p-sortIcon field="dateSeconds"></p-sortIcon>
                 </th>
+                <th pSortableColumn="distance">
+                    <span i18n>Distance</span>
+                    <p-sortIcon field="distance"></p-sortIcon>
+                </th>
+                <th pSortableColumn="target">
+                    <span i18n>Target</span>
+                    <p-sortIcon field="target"></p-sortIcon>
+                </th>
+                <th pSortableColumn="score">
+                    <span i18n>Score</span>
+                    <p-sortIcon field="score"></p-sortIcon>
+                </th>
+                <th pSortableColumn="groupingScore">
+                    <span i18n>Group</span>
+                    <p-sortIcon field="groupingScore"></p-sortIcon>
+                </th>
+                <th pSortableColumn="arrowCount">
+                    <span i18n>Arrows</span>
+                    <p-sortIcon field="arrowCount"></p-sortIcon>
+                </th>
+                <th></th>
             </tr>
             <tr>
                 <th>
@@ -69,7 +88,7 @@
         <ng-template let-shooting pTemplate="body">
             <tr>
                 <td>
-                    {{toShootingModel(shooting).name}}
+                    {{toShootingModel(shooting).name}} - {{toShootingModel(shooting).dateSeconds}}
                 </td>
                 <td>
                     {{toShootingModel(shooting).distance}}
@@ -100,7 +119,7 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="4" i18n>No shooting found.</td>
+                <td colspan="7" i18n>No shooting found.</td>
             </tr>
         </ng-template>
     </p-table>
