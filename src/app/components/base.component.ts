@@ -1,4 +1,5 @@
 import {Directive} from "@angular/core";
+import {Observable} from "rxjs";
 
 @Directive()
 export default abstract class BaseComponent {
@@ -6,7 +7,7 @@ export default abstract class BaseComponent {
 
     }
 
-    canDeactivate() {
+    canDeactivate(): boolean | Observable<boolean> | Promise<boolean> {
         return true;
     }
 }

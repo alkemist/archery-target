@@ -14,12 +14,13 @@ import {
 import BaseComponent from "@base-component";
 import {MapBuilder} from "../../../services/map.builder";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormArray, FormControl, FormGroup} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ShootingModel} from "@models";
+import {ArrowInterface, ShootingFormInterface, ShootingModel} from "@models";
 import {combineLatest, shareReplay} from "rxjs";
 import {UserService} from "@services";
-import {CompareHelper} from "@alkemist/compare-engine";
+import {ConfirmationService} from "primeng/api";
+import {CompareHelper, FormGroupSupervisor, RecursivePartial} from "@alkemist/ng-form-supervisor";
 
 @Component({
     templateUrl: "./shooting.component.html",
@@ -44,15 +45,26 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
 
     margin = MapBuilder.TARGET_MARGIN + 'px'
 
-    shootingForm = new FormGroup<{
-        date: FormControl<Date | null>,
-        distance: FormControl<number | null>,
-        target: FormControl<number | null>
-    }>({
-        date: new FormControl<Date>(new Date()),
+    shootingForm = new FormGroup({
+        date: new FormControl<Date | null>(new Date()),
         distance: new FormControl<number | null>(null),
         target: new FormControl<number | null>(null),
+        arrows: new FormArray([
+            new FormControl<ArrowInterface | null>({
+                x: 0,
+                y: 0,
+                value: 0,
+                distance: 0,
+                score: 0,
+                center: {x: 0, y: 0},
+            } as ArrowInterface)
+        ])
     });
+
+    shootingSupervisor = new FormGroupSupervisor(
+        this.shootingForm,
+        this.shootingForm.value as ShootingFormInterface
+    );
 
     deleteModeControl = new FormControl<boolean>(false);
 
@@ -61,9 +73,11 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         public mapBuilder: MapBuilder,
         private router: Router,
         private activatedRoute: ActivatedRoute,
+        private confirmationService: ConfirmationService,
         private changeDetectorRef: ChangeDetectorRef
     ) {
         super();
+        this.mapBuilder.reset();
 
         this.mapBuilder.mapShowed.set(true);
 
@@ -77,11 +91,20 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
             .pipe(takeUntilDestroyed())
             .subscribe((shooting) => {
                 this.shooting.set(shooting);
+
                 if (shooting.arrows.length === 0) {
                     if (this.deleteModeControl.value) {
                         this.deleteModeControl.setValue(false);
                     }
                 }
+
+                this.shootingSupervisor.setValue(shooting.toFormData(), {emitEvent: false});
+
+                console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
+                console.log('- Shooting change', this.shootingSupervisor.getChanges())
+                console.log('- Shooting compare', this.shootingSupervisor['compareEngine']['panels'])
+
+
                 this.changeDetectorRef.detectChanges();
             })
 
@@ -101,21 +124,30 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
                     const [routeData] = mixedData as
                         [{ shooting: ShootingModel | null }, boolean];
 
-                    if (routeData && routeData["shooting"]) {
-                        const shooting = CompareHelper.deepClone(routeData["shooting"]);
+                    const shooting = routeData && routeData["shooting"]
+                        ? CompareHelper.deepClone(routeData["shooting"])
+                        : new ShootingModel()
 
-                        this.mapBuilder.updateShootingByQuery(shooting)
-                        this.shootingForm.setValue(shooting.toDialogForm());
-                    } else {
-                        this.mapBuilder.updateShootingByQuery(new ShootingModel())
-                        this.mapBuilder.updateShootingByForm(this.shootingForm.value)
-                    }
+                    this.shootingSupervisor.setValue(shooting.toFormData(), {emitEvent: false});
+                    this.shootingSupervisor.resetInitialValue();
+
+                    this.mapBuilder.updateShootingByQuery(shooting as ShootingModel);
+
+                    console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
+                    console.log('- Shooting change', this.shootingSupervisor.getChanges())
+                    console.log('- Shooting compare', this.shootingSupervisor['compareEngine']['panels'])
                 });
 
         this.shootingForm.valueChanges
             .pipe(takeUntilDestroyed())
             .subscribe(() => {
-                this.mapBuilder.updateShootingByForm(this.shootingForm.value)
+                console.log('Update form', this.shootingForm.value);
+
+                this.mapBuilder.updateShootingByForm(this.shootingForm.value as RecursivePartial<ArrowInterface>);
+
+                console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
+                console.log('- Shooting change', this.shootingSupervisor.getChanges())
+                console.log('- Shooting compare', this.shootingSupervisor['compareEngine']['panels'])
             })
     }
 
@@ -154,6 +186,22 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
     }
 
     override canDeactivate() {
+        console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
+
+        if (this.shootingSupervisor.hasChange()) {
+            return new Promise<boolean>((resolve) => {
+                this.confirmationService.confirm({
+                    key: "shooting",
+                    message: "You have unsaved changes. Are you sure you want to leave this page?",
+                    accept: () => {
+                        resolve(true);
+                    },
+                    reject: () => {
+                        resolve(false);
+                    }
+                });
+            });
+        }
         return true;
     }
 

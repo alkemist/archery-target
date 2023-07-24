@@ -12,6 +12,8 @@
 <div class="float-button-left flex align-items-center gap-3">
     <p-button *ngIf="logged()" [routerLink]="['/', 'shootings']"
               icon="pi pi-list" styleClass="p-button-rounded"></p-button>
+    <p-button *ngIf="logged() && shooting()?.id" [routerLink]="['/', 'shooting']"
+              icon="pi pi-plus" styleClass="p-button-rounded"></p-button>
 </div>
 <div class="float-button-right flex align-items-center gap-3">
     <p-toggleButton *ngIf="mapBuilder.arrowsCount > 0" [formControl]="deleteModeControl"
@@ -27,16 +29,6 @@
     <p-progressSpinner></p-progressSpinner>
 </p-blockUI>
 
-<p-confirmDialog #cd header="Confirmation" i18n-header icon="pi pi-exclamation-triangle" key="shooting">
-    <p-footer>
-        <button (click)="cd.reject()" i18n-label icon="pi pi-times" label="No" pButton
-                pRipple
-                type="button"></button>
-        <button (click)="cd.accept()" class="p-button-danger" i18n-label icon="pi pi-check" label="Yes" pButton
-                pRipple
-                type="button"></button>
-    </p-footer>
-</p-confirmDialog>
 <p-dialog #content [(visible)]="modalOpened"
           [dismissableMask]="true" [modal]="true" [resizable]="false"
           appendTo="body" header="Specifications"

@@ -9,10 +9,9 @@ import {
     ShootingStoredInterface
 } from "@models";
 import {MathHelper, slugify} from "@tools";
-import {CompareHelper} from "@alkemist/compare-engine";
+import {CompareHelper} from "@alkemist/ng-form-supervisor";
 
 export class ShootingModel extends DocumentModel implements HasIdInterface {
-    private static REDUCE_SECONDS = 1000000;
     private _date: Date;
     private readonly _dateSeconds: number;
     private _distance: number;
@@ -24,8 +23,15 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
 
     constructor(shooting?: Partial<ShootingFrontInterface> | ShootingStoredInterface) {
         const date = shooting && shooting.date ? shooting.date
-            : shooting && shooting.dateSeconds ? new Date(shooting.dateSeconds * ShootingModel.REDUCE_SECONDS)
+            : shooting && shooting.dateSeconds ? new Date(shooting.dateSeconds)
                 : new Date();
+
+        if (!shooting?.date && !shooting?.dateSeconds) {
+            date.setHours(0);
+            date.setMinutes(0);
+            date.setSeconds(0);
+            date.setMilliseconds(0);
+        }
 
         const arrows = ((shooting && shooting.arrows) ? shooting.arrows : [])
             .map((arrow) => new ArrowModel(arrow));
@@ -157,7 +163,7 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
     override toFirestore(): ShootingBackInterface {
         return {
             ...super.toFirestore(),
-            dateSeconds: MathHelper.round(this._date.getTime() / ShootingModel.REDUCE_SECONDS, 0),
+            dateSeconds: MathHelper.round(this._date.getTime(), 0),
             distance: this._distance,
             target: this._target,
             score: this._score,
@@ -167,11 +173,12 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
         }
     }
 
-    toDialogForm(): ShootingFormInterface {
+    toFormData(): ShootingFormInterface {
         return {
             date: this._date,
             distance: this._distance,
             target: this._target,
+            arrows: this._arrows.map(arrow => arrow.toFormData())
         };
     }
 

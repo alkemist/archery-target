@@ -2,8 +2,8 @@ import {ChangeDetectionStrategy, Component, signal} from "@angular/core";
 import BaseComponent from "@base-component";
 import {ShootingService} from "../../../services/shooting.service";
 import {ShootingModel} from "@models";
-import {CompareHelper} from "@alkemist/compare-engine";
 import {ConfirmationService, SortEvent} from "primeng/api";
+import {CompareHelper} from "@alkemist/ng-form-supervisor";
 
 
 @Component({

@@ -2,14 +2,7 @@ import {Inject, Injectable} from "@angular/core";
 import {BehaviorSubject, filter, map, Observable, of} from "rxjs";
 import {FirestoreService} from "./firestore.service";
 import {UserInterface, UserModel} from "@models";
-import {
-    InvalidEmailError,
-    OfflineError,
-    TooManyRequestError,
-    UserNotExistError,
-    WrongApiKeyError,
-    WrongPasswordError
-} from "@errors";
+import {DocumentNotFoundError, InvalidEmailError, UserNotExistError} from "@errors";
 import {LoggerService} from "./logger.service";
 import {
     getAuth,
@@ -29,6 +22,7 @@ import {FirebaseAuthError} from "../errors/firebase-auth.error";
 import {Router} from "@angular/router";
 import {DOCUMENT} from "@angular/common";
 import {environment} from "../../environments/environment";
+import {VanillaError} from "../errors/vanilla.error";
 
 export type AppKey = "google";
 
@@ -91,28 +85,8 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         return signInWithEmailAndPassword(this.auth, email, password)
             .then((userCredential) => this.getUser(userCredential.user))
             .catch((error) => {
-                throw this.catchErrors(error);
+                throw this.catchKnownErrors(error);
             });
-    }
-
-    catchErrors(error: { code: string }) {
-        if (error.code === "auth/invalid-email") {
-            return new InvalidEmailError();
-        } else if (error.code === "auth/wrong-password" || error.code === "auth/_user-not-found") {
-            return new WrongPasswordError();
-        } else if (error.code === "auth/too-many-requests") {
-            return new TooManyRequestError();
-        } else if (error.code === "auth/api-key-not-valid.-please-pass-a-valid-api-key.") {
-            return new WrongApiKeyError();
-        } else if (error.code === "auth/network-request-failed") {
-            this.messageService.add({
-                severity: "error",
-                detail: `${$localize`You are offline`}`
-            });
-            return new OfflineError();
-        } else {
-            return new FirebaseAuthError(error);
-        }
     }
 
     sendLoginLink(email: string) {
@@ -185,10 +159,19 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         window.localStorage.setItem("loginWithProvider", "true");
         return signInWithRedirect(this.auth, new GoogleAuthProvider())
             .catch((error) => {
-                const customError = this.catchErrors(error);
-                this.loggerService.error(customError);
-                return Promise.reject(customError);
+                return this.catchErrors(error);
             });
+    }
+
+    override catchErrors(error: VanillaError) {
+        let customError = super.catchKnownErrors(error);
+
+        if (!customError) {
+            customError = new FirebaseAuthError(error);
+        }
+
+        this.loggerService.error(customError);
+        return Promise.reject(customError);
     }
 
     async logout(): Promise<void> {
@@ -212,13 +195,15 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
 
             this._user = new UserModel(dataUser);
             this._isLoggedIn.next(true);
-        }).catch(() => {
-            this.messageService.add({
-                severity: "error",
-                detail: `${$localize`You are not authorized to use this application`}`
-            });
-            this._isLoggedIn.next(false);
-            this.loggerService.error(new UserNotExistError());
+        }).catch((err) => {
+            if (err instanceof DocumentNotFoundError) {
+                this.messageService.add({
+                    severity: "error",
+                    detail: `${$localize`You are not authorized to use this application`}`
+                });
+                this._isLoggedIn.next(false);
+                this.loggerService.error(new UserNotExistError());
+            }
         });
     }
 }

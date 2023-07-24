@@ -2,10 +2,26 @@
 # yarn lockfile v1
 
 
-"@alkemist/compare-engine@^1.2.3":
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/@alkemist/compare-engine/-/compare-engine-1.2.3.tgz#14cc86ea7b3458cbbecec6bd87378a28b35fcb13"
-  integrity sha512-YJuK914hWsh1nb/hsKKkULyAHV+F7bx8gpf7+FW34PIMKSf2V7jHWR1YcA81b9C6qJenl8UlKx3C23dUz6a/qA==
+"@alkemist/compare-engine@^1.2.8":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@alkemist/compare-engine/-/compare-engine-1.2.8.tgz#8f55a8f646b09620384a5b582e950c8bbc1b2712"
+  integrity sha512-vl/XHBGtwVWJ2F3K7lMGemMkmaDXJwziKAwlaWehdNO5+yv4bj8/upv0AsGGhrFeQHoYw2Od2l2o2J5Jru9vkw==
+
+"@alkemist/ng-form-supervisor@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@alkemist/ng-form-supervisor/-/ng-form-supervisor-1.1.1.tgz#ce9c77d824c71ab14e0811ecd743416d148f58d3"
+  integrity sha512-9p/Ts8PD7LtodchKrG9fQVyS0c0l1AP3Sh/JtF7XberyR338Gr8zS4bc7vBaN2+gWjl7NgVRi/scXgIQeOVpcg==
+  dependencies:
+    "@alkemist/compare-engine" "^1.2.8"
+    "@angular/common" "^16.0.0"
+    "@angular/compiler" "^16.0.0"
+    "@angular/compiler-cli" "^16.0.2"
+    "@angular/core" "^16.0.0"
+    "@angular/forms" "^16.0.0"
+    "@angular/platform-browser" "^16.0.0"
+    "@angular/platform-browser-dynamic" "^16.0.0"
+    rxjs "^7.8.1"
+    zone.js "^0.13.1"
 
 "@ampproject/remapping@2.2.1", "@ampproject/remapping@^2.2.0":
   version "2.2.1"
@@ -12270,7 +12286,7 @@ run-parallel@^1.1.4, run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
-rxjs@7.8.1, rxjs@^7.5.5, rxjs@~7.8.0:
+rxjs@7.8.1, rxjs@^7.5.5, rxjs@^7.8.1, rxjs@~7.8.0:
   version "7.8.1"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
   integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==

@@ -21,6 +21,7 @@ export interface ShootingFormInterface {
     date: Date | null,
     distance: number | null,
     target: number | null,
+    arrows: ArrowInterface[]
 }
 
 export type ShootingBackInterface = Partial<ShootingFrontInterface> & DocumentBackInterface;

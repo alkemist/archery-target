@@ -1,25 +1,37 @@
-import {DatabaseError, DocumentNotFoundError, EmptyDocumentIdError, QuotaExceededError} from "@errors";
+import {
+    DatabaseError,
+    DocumentMalformedError,
+    DocumentNotFoundError,
+    EmptyDocumentIdError,
+    InvalidEmailError,
+    OfflineError,
+    QuotaExceededError,
+    TooManyRequestError,
+    WrongApiKeyError,
+    WrongPasswordError
+} from "@errors";
 import {FirestoreDataConverter} from "@firebase/firestore";
 import {LoggerService} from "@services";
 import {generatePushID, slugify} from "@tools";
 import {
-  collection,
-  CollectionReference,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  getFirestore,
-  orderBy,
-  query,
-  QueryConstraint,
-  setDoc,
-  where,
+    collection,
+    CollectionReference,
+    deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    getFirestore,
+    orderBy,
+    query,
+    QueryConstraint,
+    setDoc,
+    where,
 } from "firebase/firestore";
 import {DocumentBackInterface, DocumentModel, HasIdInterface, HasIdWithInterface} from "@models";
 import {objectConverter} from "../converters/object.converter";
 import {MessageService} from "primeng/api";
 import {environment} from "../../environments/environment";
+import {VanillaError} from "../errors/vanilla.error";
 
 
 export abstract class FirestoreService<
@@ -39,6 +51,48 @@ export abstract class FirestoreService<
         this.ref = collection(getFirestore(), collectionName);
     }
 
+    catchKnownErrors(error: VanillaError) {
+        if (error.code === "auth/invalid-email") {
+            return new InvalidEmailError();
+        } else if (error.code === "auth/wrong-password" || error.code === "auth/_user-not-found") {
+            return new WrongPasswordError();
+        } else if (error.code === "auth/too-many-requests") {
+            return new TooManyRequestError();
+        } else if (error.code === "auth/api-key-not-valid.-please-pass-a-valid-api-key.") {
+            return new WrongApiKeyError();
+        } else if (error.code === "auth/network-request-failed" || error.code === "unavailable") {
+            this.messageService.add({
+                severity: "error",
+                detail: `${$localize`You are offline`}`
+            });
+            return new OfflineError();
+        }
+        return null;
+    }
+
+    catchErrors(error: VanillaError, obj?: any) {
+        console.log(error.code, error)
+        let customError = this.catchKnownErrors(error);
+
+        if (!customError) {
+            if (error.code === "invalid-argument") {
+                customError = new DocumentMalformedError(
+                    this.collectionName,
+                    obj
+                );
+            } else {
+                customError = new DatabaseError(
+                    this.collectionName,
+                    error.message,
+                    obj
+                );
+            }
+        }
+
+        this.loggerService.error(customError);
+        return Promise.reject(customError);
+    }
+
     public async exist(name: string): Promise<boolean> {
         if (!name) {
             return false;
@@ -49,7 +103,7 @@ export abstract class FirestoreService<
         let dataObjectDocument = null;
         try {
             dataObjectDocument = await this.findOneBySlug(slug);
-        } catch (error) {
+        } catch (error: VanillaError | DocumentNotFoundError | any) {
             if (error instanceof DocumentNotFoundError) {
                 return false;
             }
@@ -60,7 +114,6 @@ export abstract class FirestoreService<
     public async findOneById(id: string): Promise<HasIdWithInterface<I>> {
         let docSnapshot;
 
-
         if (environment["APP_OFFLINE"]) {
             return this.findOneBy("id", id);
         }
@@ -68,12 +121,8 @@ export abstract class FirestoreService<
         try {
             const ref = doc(this.ref, id).withConverter(this.converter);
             docSnapshot = await getDoc(ref);
-        } catch (error) {
-            this.loggerService.error(new DatabaseError(
-                this.collectionName,
-                (error as Error).message,
-                {id}
-            ));
+        } catch (error: VanillaError | any) {
+            return this.catchErrors(error, {id});
         }
 
         if (!docSnapshot) {
@@ -98,11 +147,7 @@ export abstract class FirestoreService<
         try {
             list = await this.queryList(where(property, "==", value));
         } catch (error) {
-            this.loggerService.error(new DatabaseError(
-                this.collectionName,
-                (error as Error).message,
-                {[property]: value}
-            ));
+            return this.catchErrors(error as VanillaError, {[property]: value});
         }
 
         if (list.length === 0) {
@@ -126,11 +171,7 @@ export abstract class FirestoreService<
                 detail: `${this.collectionNameTranslated} ${$localize`added`}`
             });
         } catch (error) {
-            this.loggerService.error(new DatabaseError(
-                this.collectionName,
-                (error as Error).message,
-                document
-            ));
+            return this.catchErrors(error as VanillaError, document);
         }
         return await this.findOneById(id);
     }
@@ -148,11 +189,7 @@ export abstract class FirestoreService<
                 detail: `${this.collectionNameTranslated} ${$localize`updated`}`,
             });
         } catch (error) {
-            this.loggerService.error(new DatabaseError(
-                this.collectionName,
-                (error as Error).message,
-                document
-            ));
+            return this.catchErrors(error as VanillaError, document);
         }
         return await this.findOneById(document.id);
     }
@@ -170,11 +207,7 @@ export abstract class FirestoreService<
                 detail: `${this.collectionNameTranslated} ${$localize`deleted`}`
             });
         } catch (error) {
-            this.loggerService.error(new DatabaseError(
-                this.collectionName,
-                (error as Error).message,
-                document
-            ));
+            return this.catchErrors(error as VanillaError, document);
         }
     }
 

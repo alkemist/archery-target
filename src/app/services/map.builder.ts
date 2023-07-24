@@ -6,7 +6,7 @@ import {MathHelper} from "@tools";
 import {ArrowComponent} from "@components";
 import {Subject} from "rxjs";
 import {ShootingService} from "./shooting.service";
-import {CompareHelper} from "@alkemist/compare-engine";
+import {CompareHelper, RecursivePartial} from "@alkemist/ng-form-supervisor";
 import {CenterComponent} from "../components/center/center.component";
 
 
@@ -47,8 +47,9 @@ export class MapBuilder {
     private _pageElement?: HTMLElement;
     private _mapElement?: HTMLElement;
     private _rayons: number[] = [];
-    private _shooting: ShootingModel | null = null;
+    private _shooting: ShootingModel = new ShootingModel();
     private _shootingCenterViewRef?: ComponentRef<CenterComponent>;
+    private _components = new Map<string, ComponentRef<ArrowComponent>>();
 
     constructor(
         private shootingService: ShootingService
@@ -85,6 +86,7 @@ export class MapBuilder {
     }
 
     saveShooting() {
+        this.shooting.updateNameAndSlug();
         return this.shootingService.addOrUpdate(this.shooting);
     }
 
@@ -110,17 +112,15 @@ export class MapBuilder {
         this.mapShowed.set(false);
         this._viewContainerRef = undefined;
         this._shootingCenterViewRef = undefined;
+        this._components.clear();
 
+        this._shooting = new ShootingModel();
         this.clear();
     }
 
     clear() {
         this.shooting.arrows.forEach((arrow) => {
-            const viewRefIndex = this._viewContainerRef?.indexOf(arrow.viewRef);
-
-            if (viewRefIndex !== undefined && viewRefIndex > -1) {
-                this._viewContainerRef?.remove(viewRefIndex);
-            }
+            this.removeArrow(arrow);
         });
         this.shooting.arrows = [];
         this.updateShootingCenter();
@@ -306,13 +306,16 @@ export class MapBuilder {
         this.checkPageStatus();
     }
 
-    removeArrowByIndex(index: number) {
-        const arrow = this.shooting.arrows[index];
-        const viewRefIndex = this._viewContainerRef?.indexOf(arrow.viewRef);
+    removeArrow(arrow: ArrowModel) {
+        const arrowIndex = this.shooting.arrows.indexOf(arrow);
+        const componentRef = this._components.get(arrow.uid);
 
-        if (viewRefIndex !== undefined && viewRefIndex > -1) {
-            this._viewContainerRef?.remove(viewRefIndex);
-            this.shooting.removeArrow(index);
+        if (arrowIndex > -1 && componentRef) {
+            const componentIndex = this._viewContainerRef?.indexOf(componentRef.hostView)
+            this._viewContainerRef?.remove(componentIndex);
+
+            this.shooting.removeArrow(arrowIndex);
+            this._components.delete(arrow.uid);
             this.updateShootingCenter();
             this._shootingChanged.next(this.shooting);
         } else {
@@ -320,7 +323,7 @@ export class MapBuilder {
         }
     }
 
-    updateShootingByForm(value: Partial<ShootingFormInterface>) {
+    updateShootingByForm(value: RecursivePartial<ShootingFormInterface>) {
         if (value.date) {
             this.shooting.date = value.date;
             this.shooting.updateNameAndSlug();
@@ -331,7 +334,6 @@ export class MapBuilder {
         if (value.target) {
             this.shooting.target = value.target;
         }
-        this._shootingChanged.next(this.shooting);
     }
 
     updateShootingByQuery(shooting: ShootingModel) {
@@ -455,30 +457,27 @@ export class MapBuilder {
             this.shooting.addArrow(arrow);
             this.updateShootingCenter();
             this._shootingChanged.next(this.shooting);
-
         }
     }
 
     private addArrow(arrow: ArrowModel) {
         const componentRef = this._viewContainerRef?.createComponent(ArrowComponent);
 
-        if (componentRef) {
-            arrow.viewRef = componentRef.hostView;
-
+        if (this._viewContainerRef && componentRef) {
             const componentInstance = componentRef.instance;
 
             componentInstance.setPosition(arrow.forComponent());
+
+            this._components.set(arrow.uid, componentRef);
         }
     }
 
     private removeArrowByPoint(point: CoordinateInterface) {
         const arrowPoint = this.placeArrow(point);
-        const index = this.shooting.arrows.findIndex(arrow => arrow.hasPoint(arrowPoint))
+        const arrow = this.shooting.arrows.find(arrow => arrow.hasPoint(arrowPoint));
 
-        if (index > -1) {
-            this.removeArrowByIndex(index);
-            this.updateShootingCenter();
-            this._shootingChanged.next(this.shooting);
+        if (arrow) {
+            this.removeArrow(arrow);
         } else {
             throw new Error("Unknown arrow by point")
         }

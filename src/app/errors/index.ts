@@ -1,6 +1,7 @@
 export * from './api.error';
 export * from './base.error';
 export * from './database.error';
+export * from './document-malformed.error';
 export * from './document-not-found.error';
 export * from './empty-document-id.error';
 export * from './empty-document-name.error';

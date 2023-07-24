@@ -1,7 +1,6 @@
 import {ArrowComponentInterface, ArrowInterface, CoordinateInterface} from "@models";
 import {ArrowComponent} from "@components";
-import {ViewRef} from "@angular/core";
-import {ColorInterface, StyleHelper} from "@tools";
+import {ColorInterface, generatePushID, StyleHelper} from "@tools";
 import {PointModel} from "./point.model";
 
 export class ArrowModel {
@@ -19,11 +18,12 @@ export class ArrowModel {
         {color: {r: 255, g: 245, b: 53}, bgOffset: {r: -150, g: -150, b: -53, a: 0.4}, fontColor: 'white'},// 10 - yellow
     ];
 
+    private _uid: string;
     private _x: number;
     private _y: number;
     private _score: number = 0;
     private _distance: number = 0;
-    private _viewRef?: ViewRef;
+    private _viewRefIndex: number = 0;
     private _color: string = '';
     private _bgColor: string = '';
     private _fontColor: string = '';
@@ -31,6 +31,7 @@ export class ArrowModel {
     private _center: PointModel = new PointModel(0, 0);
 
     constructor(data: ArrowInterface) {
+        this._uid = generatePushID();
         this._x = data.x;
         this._y = data.y;
 
@@ -47,6 +48,10 @@ export class ArrowModel {
         }
     }
 
+    get uid(): string {
+        return this._uid;
+    }
+
     get x(): number {
         return this._x;
     }
@@ -61,6 +66,14 @@ export class ArrowModel {
 
     set y(value: number) {
         this._y = value;
+    }
+
+    get viewRefIndex(): number {
+        return this._viewRefIndex;
+    }
+
+    set viewRefIndex(value: number) {
+        this._viewRefIndex = value;
     }
 
     get center(): CoordinateInterface {
@@ -110,14 +123,6 @@ export class ArrowModel {
         this._distance = distance;
     }
 
-    get viewRef(): ViewRef {
-        return this._viewRef as ViewRef;
-    }
-
-    set viewRef(viewRef: ViewRef) {
-        this._viewRef = viewRef;
-    }
-
     hasPoint(point: ArrowModel) {
         return point.center.x >= this.center.x - ArrowComponent.size / 2
             && point.center.x <= this.center.x + ArrowComponent.size / 2
@@ -135,7 +140,7 @@ export class ArrowModel {
         }
     }
 
-    toForm(): ArrowInterface {
+    toFormData(): ArrowInterface {
         return {
             score: this._score,
             distance: this._distance,
