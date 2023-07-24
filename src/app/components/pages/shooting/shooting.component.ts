@@ -100,11 +100,6 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
 
                 this.shootingSupervisor.setValue(shooting.toFormData(), {emitEvent: false});
 
-                console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
-                console.log('- Shooting change', this.shootingSupervisor.getChanges())
-                console.log('- Shooting compare', this.shootingSupervisor['compareEngine']['panels'])
-
-
                 this.changeDetectorRef.detectChanges();
             })
 
@@ -132,22 +127,12 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
                     this.shootingSupervisor.resetInitialValue();
 
                     this.mapBuilder.updateShootingByQuery(shooting as ShootingModel);
-
-                    console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
-                    console.log('- Shooting change', this.shootingSupervisor.getChanges())
-                    console.log('- Shooting compare', this.shootingSupervisor['compareEngine']['panels'])
                 });
 
         this.shootingForm.valueChanges
             .pipe(takeUntilDestroyed())
             .subscribe(() => {
-                console.log('Update form', this.shootingForm.value);
-
                 this.mapBuilder.updateShootingByForm(this.shootingForm.value as RecursivePartial<ArrowInterface>);
-
-                console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
-                console.log('- Shooting change', this.shootingSupervisor.getChanges())
-                console.log('- Shooting compare', this.shootingSupervisor['compareEngine']['panels'])
             })
     }
 
@@ -186,8 +171,6 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
     }
 
     override canDeactivate() {
-        console.log('- Shooting change ?', this.shootingSupervisor.hasChange())
-
         if (this.shootingSupervisor.hasChange()) {
             return new Promise<boolean>((resolve) => {
                 this.confirmationService.confirm({

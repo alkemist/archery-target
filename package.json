@@ -18,7 +18,7 @@
   },
   "private": true,
   "dependencies": {
-    "@alkemist/ng-form-supervisor": "^1.1.1",
+    "@alkemist/ng-form-supervisor": "^1.1.2",
     "@angular/animations": "^16.0.0",
     "@angular/common": "^16.0.0",
     "@angular/compiler": "^16.0.0",
