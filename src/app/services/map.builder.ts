@@ -114,7 +114,7 @@ export class MapBuilder {
         this._shootingCenterViewRef = undefined;
         this._components.clear();
 
-        this._shooting = new ShootingModel();
+        this._shooting.reset();
         this.clear();
     }
 
@@ -122,6 +122,7 @@ export class MapBuilder {
         this.shooting.arrows.forEach((arrow) => {
             this.removeArrow(arrow);
         });
+
         this.shooting.arrows = [];
         this.updateShootingCenter();
         this._shootingChanged.next(this.shooting);
@@ -129,7 +130,10 @@ export class MapBuilder {
 
     build(arrows: ArrowModel[]) {
         arrows.forEach(arrow => this.addArrow(arrow));
+
         this.updateShootingCenter();
+
+        this._shootingChanged.next(this.shooting);
     }
 
     updateShootingCenter() {
@@ -334,11 +338,18 @@ export class MapBuilder {
         if (value.target) {
             this.shooting.target = value.target;
         }
+        this._shootingChanged.next(this.shooting);
     }
 
-    updateShootingByQuery(shooting: ShootingModel) {
-        this._shooting = shooting;
-        this.build(shooting.arrows);
+    updateShootingByQuery(shooting?: ShootingModel) {
+        if (shooting) {
+            this._shooting = shooting;
+        } else {
+            this._shooting.reset();
+        }
+
+        this.build(this._shooting.arrows);
+        return this._shooting;
     }
 
     private checkPageStatus() {

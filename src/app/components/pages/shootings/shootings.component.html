@@ -1,14 +1,17 @@
 <div class="page-container__content h-full">
-    <p-table #dt (sortFunction)="customSort($event)" [customSort]="true" [loading]="loading()"
-             [pageLinks]="2" [paginator]="true"
-             [rows]="10" [value]="shootings()"
-             breakpoint="400px" dataKey="id"
-             responsiveLayout="scroll" scrollHeight="flex"
+    <p-table #dt (onFilter)="onFilter($event)" (selectionChange)="onSelection($event)"
+             (sortFunction)="customSort($event)"
+             [customSort]="true" [loading]="loading()"
+             [metaKeySelection]="true" [pageLinks]="2" [paginator]="filteredShootings().length > 0"
+             [rows]="50" [scrollable]="true"
+             [selection]="selectedShootings()" [value]="shootings()"
+             breakpoint="400px" dataKey="id" responsiveLayout="scroll"
+             scrollHeight="flex" selectionMode="multiple"
              sortField="dateSeconds" styleClass="p-datatable-m">
         <ng-template pTemplate="header">
             <tr>
-                <th style="width: 10%;max-width:200px;"></th>
-                <th pSortableColumn="dateSeconds" style="min-width:100px">
+                <th pFrozenColumn style="width: 10%;max-width:200px;"></th>
+                <th pFrozenColumn pSortableColumn="dateSeconds" style="min-width:100px">
                     <span i18n>Date</span>
                     <p-sortIcon field="dateSeconds"></p-sortIcon>
                 </th>
@@ -34,14 +37,14 @@
                 </th>
             </tr>
             <tr>
-                <th>
+                <th pFrozenColumn>
                     <a [routerLink]="['/', 'shooting']"
                        class="p-button-rounded p-button-success p-button-text"
                        icon="pi pi-plus"
                        pButton
                        pRipple></a>
                 </th>
-                <th>
+                <th pFrozenColumn>
                     <p-columnFilter [showMenu]="false" field="name" matchMode="contains">
                         <ng-template let-filter="filterCallback" let-value pTemplate="filter">
                             <input (ngModelChange)="filter($event)" [ngModel]="value" pInputText/>
@@ -97,8 +100,8 @@
             </tr>
         </ng-template>
         <ng-template let-shooting pTemplate="body">
-            <tr>
-                <td class="align-right">
+            <tr [pSelectableRow]="shooting">
+                <td class="align-right" pFrozenColumn>
                     <a [routerLink]="['/', 'shooting', shooting.id]"
                        class="p-button-rounded p-button-success p-button-text"
                        icon="pi pi-pencil"
@@ -108,7 +111,7 @@
                               icon="pi pi-trash"
                               styleClass="p-button-rounded p-button-danger p-button-text"></p-button>
                 </td>
-                <td>
+                <td pFrozenColumn>
                     {{toShootingModel(shooting).name}}
                 </td>
                 <td>
@@ -132,6 +135,43 @@
             <tr>
                 <td colspan="7" i18n>No shooting found.</td>
             </tr>
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <tr *ngIf="filteredShootings().length > 0">
+                <td pFrozenColumn>
+
+                </td>
+                <td pFrozenColumn>
+
+                </td>
+                <td>
+
+                </td>
+                <td>
+                    {{ totalScore() }}
+                </td>
+                <td>
+
+                </td>
+                <td>
+                    {{ totalArrows() }}
+                </td>
+                <td>
+
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="paginatorleft">
+            <a [routerLink]="['/', 'shooting']"
+               class="p-button-rounded p-button-success p-button-text"
+               icon="pi pi-plus"
+               pButton
+               pRipple></a>
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+            <div *ngIf="filteredShootings().length > 0">
+                {{ filteredShootings().length }} <span i18n>shootings</span>
+            </div>
         </ng-template>
     </p-table>
 </div>

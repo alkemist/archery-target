@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@alkemist/compare-engine/-/compare-engine-1.2.8.tgz#8f55a8f646b09620384a5b582e950c8bbc1b2712"
   integrity sha512-vl/XHBGtwVWJ2F3K7lMGemMkmaDXJwziKAwlaWehdNO5+yv4bj8/upv0AsGGhrFeQHoYw2Od2l2o2J5Jru9vkw==
 
-"@alkemist/ng-form-supervisor@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@alkemist/ng-form-supervisor/-/ng-form-supervisor-1.1.2.tgz#7e0bef9726dc432ddf7c363577f080ee19472e8d"
-  integrity sha512-zmpXr6NV7UXKJat2fsZWB2DMsjNpmhvZzdvT55FMBTr+Rw348EXJRCwLg5cFfRnrl7Obc4KC/sCLu46/NYgcQw==
+"@alkemist/ng-form-supervisor@^1.1.13":
+  version "1.1.13"
+  resolved "https://registry.yarnpkg.com/@alkemist/ng-form-supervisor/-/ng-form-supervisor-1.1.13.tgz#13e3415bb4ba648e9ac074143f518fb55c53bd61"
+  integrity sha512-FUEc3cZ7FZjq66+NM8uTOExBAMf9p+vnet9DG+fzvMAO/Dmzr86tqnaY5ocGB1aNkHveksNcp966vw4ducD3vw==
   dependencies:
     "@alkemist/compare-engine" "^1.2.8"
     "@angular/common" "^16.0.0"

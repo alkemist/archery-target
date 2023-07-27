@@ -63,7 +63,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
 
     shootingSupervisor = new FormGroupSupervisor(
         this.shootingForm,
-        this.shootingForm.value as ShootingFormInterface
+        this.shootingForm.value as ShootingFormInterface,
     );
 
     deleteModeControl = new FormControl<boolean>(false);
@@ -119,14 +119,14 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
                     const [routeData] = mixedData as
                         [{ shooting: ShootingModel | null }, boolean];
 
-                    const shooting = routeData && routeData["shooting"]
-                        ? CompareHelper.deepClone(routeData["shooting"])
-                        : new ShootingModel()
+                    const shooting = this.mapBuilder.updateShootingByQuery(
+                        routeData && routeData["shooting"]
+                            ? CompareHelper.deepClone(routeData["shooting"])
+                            : undefined
+                    );
 
                     this.shootingSupervisor.setValue(shooting.toFormData(), {emitEvent: false});
                     this.shootingSupervisor.resetInitialValue();
-
-                    this.mapBuilder.updateShootingByQuery(shooting as ShootingModel);
                 });
 
         this.shootingForm.valueChanges
@@ -193,9 +193,25 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
 
         this.mapBuilder.saveShooting().then((shootingStored) => {
             this.modalOpened = false;
+            this.shootingSupervisor.resetInitialValue();
+
             if (isNew) {
                 void this.router.navigate(['shooting', shootingStored.id]);
             }
         })
+    }
+
+    checkBeforeSave() {
+        if (this.shooting()?.id && this.shootingSupervisor.hasChange()) {
+            this.confirmationService.confirm({
+                key: "shooting",
+                message: "Do you want to overwrite the changes?",
+                accept: () => {
+                    this.submitShooting();
+                },
+            });
+        } else {
+            this.submitShooting();
+        }
     }
 }

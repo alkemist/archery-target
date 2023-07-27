@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, signal} from "@angular/core";
+import {ChangeDetectionStrategy, Component, computed, signal} from "@angular/core";
 import BaseComponent from "@base-component";
 import {ShootingService} from "../../../services/shooting.service";
 import {ShootingModel} from "@models";
@@ -17,8 +17,21 @@ import {CompareHelper} from "@alkemist/ng-form-supervisor";
 export class ShootingsComponent extends BaseComponent {
     shootings = signal<ShootingModel[]>([]);
     loading = signal<boolean>(true);
-    typeToken?: ShootingModel
     toShootingModel = CompareHelper.isT<ShootingModel>;
+
+    filteredShootings = signal<ShootingModel[]>([]);
+    selectedShootings = signal<ShootingModel[]>([]);
+
+    totalScore = computed(() =>
+        this.selectedShootings().length > 1
+            ? this.selectedShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.score, 0)
+            : this.filteredShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.score, 0)
+    );
+    totalArrows = computed(() =>
+        this.selectedShootings().length > 1
+            ? this.selectedShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.arrows.length, 0)
+            : this.filteredShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.arrows.length, 0)
+    );
 
     targets = [
         40,
@@ -41,6 +54,7 @@ export class ShootingsComponent extends BaseComponent {
     loadShootings() {
         return this.shootingService.getListOrRefresh().then((shootings) => {
             this.shootings.set(shootings);
+            this.filteredShootings.set(shootings);
             this.loading.set(false);
         });
     }
@@ -74,5 +88,13 @@ export class ShootingsComponent extends BaseComponent {
             }
             return 0;
         });
+    }
+
+    onFilter($event: any) {
+        this.filteredShootings.set($event.filteredValue);
+    }
+
+    onSelection(selectedShootings: ShootingModel[]) {
+        this.selectedShootings.set(selectedShootings)
     }
 }

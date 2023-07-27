@@ -186,4 +186,13 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
         this._name = this._date.toLocaleDateString("fr").substring(0, 5);
         this._slug = slugify(this._name);
     }
+
+    reset() {
+        this._date = new Date();
+        this._arrows = [];
+
+        this._score = this.calculScore();
+        this._center = this.calculCenter();
+        this.updateNameAndSlug();
+    }
 }
