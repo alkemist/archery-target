@@ -5,6 +5,8 @@ import {ShootingModel} from "@models";
 import {ConfirmationService, SortEvent} from "primeng/api";
 import {CompareHelper} from "@alkemist/ng-form-supervisor";
 import {ArrayHelper} from "@tools";
+import {TARGETS} from "../../../models/archery/targets";
+import {DISTANCES} from "../../../models/archery/distances";
 
 
 @Component({
@@ -34,12 +36,8 @@ export class ShootingsComponent extends BaseComponent {
             : this.filteredShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.arrows.length, 0)
     );
 
-    targets = [
-        40,
-        60,
-        80,
-        120
-    ]
+    distances = DISTANCES;
+    targets = TARGETS;
 
     constructor(
         private shootingService: ShootingService,

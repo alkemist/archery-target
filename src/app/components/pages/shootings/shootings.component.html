@@ -56,7 +56,12 @@
                     <p-columnFilter [showMenu]="false" field="distance" matchMode="equals"
                                     type="number">
                         <ng-template let-filter="filterCallback" let-value pTemplate="filter">
-                            <p-inputNumber (ngModelChange)="filter($event)" [min]="0" [ngModel]="value"></p-inputNumber>
+                            <p-dropdown (onChange)="filter($event.value)" [ngModel]="value" [options]="distances"
+                                        [showClear]="false" placeholder="Any">
+                                <ng-template let-option pTemplate="item">
+                                    {{ option }}
+                                </ng-template>
+                            </p-dropdown>
                         </ng-template>
                     </p-columnFilter>
                 </th>
