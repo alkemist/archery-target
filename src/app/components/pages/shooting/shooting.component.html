@@ -21,7 +21,8 @@
                     onIcon="fa fa-trash"
                     styleClass="p-button-rounded p-button-danger"></p-toggleButton>
     <p-button (onClick)="checkBeforeSave()" *ngIf="logged()" [disabled]="!shootingSupervisor.hasChange()"
-              icon="pi pi-check" styleClass="p-button-rounded p-button-danger"></p-button>
+              [icon]="'pi pi-' + (shooting()?.id ? 'check' : 'plus')"
+              styleClass="p-button-rounded p-button-danger"></p-button>
     <p-button (onClick)="mapBuilder.modalOpened.set(true)" *ngIf="logged()"
               icon="pi pi-pencil" styleClass="p-button-rounded"></p-button>
 </div>
