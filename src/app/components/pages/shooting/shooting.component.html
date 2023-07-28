@@ -37,12 +37,12 @@
           appendTo="body" header="Specifications"
           position="bottom" styleClass="shooting">
     <form [formGroup]="shootingForm" class="flex flex-column align-items-center gap-4">
-        <div class="flex-auto">
+        <div class="flex-auto w-full">
             <label class="mb-2 block font-bold">Date</label>
             <p-calendar [appendTo]="content" [touchUI]="true" dateFormat="dd/mm/yy" formControlName="date"
                         styleClass="inputfield w-full"></p-calendar>
         </div>
-        <div class="flex-auto">
+        <div class="flex-auto w-full">
             <label class="mb-2 block font-bold">Distance</label>
             <p-dropdown [appendTo]="content"
                         [autoDisplayFirst]="false"
@@ -58,7 +58,7 @@
                 </ng-template>
             </p-dropdown>
         </div>
-        <div class="flex-auto">
+        <div class="flex-auto w-full">
             <label class="mb-2 block font-bold">Target</label>
             <p-dropdown [appendTo]="content"
                         [autoDisplayFirst]="false"
