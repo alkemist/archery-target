@@ -6,6 +6,7 @@ import {
     CenterComponent,
     HeaderComponent,
     LoginComponent,
+    SettingsComponent,
     ShootingComponent,
     ShootingsComponent,
     StatsComponent
@@ -23,6 +24,7 @@ import './app.database';
         LoginComponent,
         ShootingComponent,
         ShootingsComponent,
+        SettingsComponent,
         StatsComponent,
         HeaderComponent,
         BlockableComponent,

@@ -9,8 +9,9 @@ import {default as NoSleep} from "nosleep.js";
 import BaseComponent from "@base-component";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {MapBuilder} from "../../../services/map.builder";
-import {ShootingModel} from "@models";
+import {SettingModel, ShootingModel} from "@models";
 import {ShootingService} from "../../../services/shooting.service";
+import {SettingService} from "../../../services/setting.service";
 
 
 @Component({
@@ -43,11 +44,13 @@ export class HeaderComponent extends BaseComponent {
         private appService: AppService,
         private userService: UserService,
         private shootingService: ShootingService,
+        private settingService: SettingService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
     ) {
         super();
         this.services["shooting"] = this.shootingService;
+        this.services["settingService"] = this.settingService;
 
         this.title = toSignal(router.events.pipe(
             map(_ => titleService.getTitle().replaceAll("-", "/"))
@@ -74,10 +77,18 @@ export class HeaderComponent extends BaseComponent {
                         this.sidebarShowed.set(false);
                     }
                 }
-            })
+            });
+
+        this.mapBuilder.onSettingsChange$
+            .pipe(takeUntilDestroyed())
+            .subscribe((settings) => {
+                this.buildMenu(settings);
+            });
+
+        this.mapBuilder.reloadSettings();
     }
 
-    buildMenu() {
+    buildMenu(settings: SettingModel[] = []) {
         this.menuItems = [...BaseMenuItems];
 
         if (this.logged()) {
@@ -89,6 +100,27 @@ export class HeaderComponent extends BaseComponent {
                 }
             );
 
+            this.menuItems.push({
+                separator: true
+            });
+
+            this.menuItems.push(
+                {
+                    label: $localize`Settings`,
+                    icon: "pi pi-search-plus",
+                    items: [
+                        {
+                            label: $localize`List`,
+                            icon: "pi pi-list",
+                            routerLink: ['/', 'settings']
+                        },
+                        ...settings.map((setting) => ({
+                            label: `${setting.name} m : ${setting.value}`,
+                        }))
+                    ]
+                }
+            );
+
             this.menuItems.push(
                 {
                     label: $localize`Statistics`,
@@ -96,7 +128,7 @@ export class HeaderComponent extends BaseComponent {
                     routerLink: ['/', 'stats'],
                 }
             );
-            
+
             this.menuItems.push({
                 separator: true
             });
@@ -111,6 +143,14 @@ export class HeaderComponent extends BaseComponent {
                             icon: "pi pi-refresh",
                             command: () => {
                                 void this.shootingService.invalidStoredData();
+                                window.location.reload();
+                            }
+                        },
+                        {
+                            label: $localize`Invalid settings`,
+                            icon: "pi pi-refresh",
+                            command: () => {
+                                void this.settingService.invalidStoredData();
                                 window.location.reload();
                             }
                         }
@@ -161,7 +201,7 @@ export class HeaderComponent extends BaseComponent {
 
     removeAllArrows() {
         this.confirmationService.confirm({
-            key: "shooting",
+            key: "header",
             message: $localize`Are you sure you want to remove all arrows ?`,
             accept: () => {
                 this.mapBuilder.clear();

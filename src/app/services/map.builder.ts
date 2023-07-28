@@ -1,20 +1,26 @@
 import {ComponentRef, ElementRef, Injectable, signal, ViewContainerRef} from '@angular/core';
 
 import 'hammerjs';
-import {ArrowModel, CoordinateInterface, ShootingFormInterface, ShootingModel, SizeInterface} from "@models";
+import {
+    ArrowModel,
+    CoordinateInterface,
+    SettingModel,
+    ShootingFormInterface,
+    ShootingModel,
+    SizeInterface
+} from "@models";
 import {MathHelper} from "@tools";
-import {ArrowComponent} from "@components";
+import {ArrowComponent, CenterComponent} from "@components";
 import {Subject} from "rxjs";
 import {ShootingService} from "./shooting.service";
 import {CompareHelper, RecursivePartial} from "@alkemist/ng-form-supervisor";
-import {CenterComponent} from "../components/center/center.component";
+import {SettingService} from "./setting.service";
 
 
 @Injectable({
     providedIn: 'root'
 })
 export class MapBuilder {
-    // @TODO Sauvegarder les paramètres viseurs
     // @TODO Determiner le reglage du viseur optimal
 
     static TARGET_MARGIN = 200;
@@ -42,6 +48,7 @@ export class MapBuilder {
     private _isZooming = false;
     private _targetElement?: HTMLImageElement;
     private _shootingChanged = new Subject<ShootingModel>();
+    private _settingsChanged = new Subject<SettingModel[]>();
     private _loaded = new Subject<boolean>();
     private _hammer?: HammerManager;
     private _pageElement?: HTMLElement;
@@ -52,9 +59,10 @@ export class MapBuilder {
     private _components = new Map<string, ComponentRef<ArrowComponent>>();
 
     constructor(
-        private shootingService: ShootingService
+        private shootingService: ShootingService,
+        private settingService: SettingService,
     ) {
-
+        this.reloadSettings();
     }
 
     get arrowsCount() {
@@ -63,6 +71,10 @@ export class MapBuilder {
 
     get onShootingChange$() {
         return this._shootingChanged.asObservable();
+    }
+
+    get onSettingsChange$() {
+        return this._settingsChanged.asObservable();
     }
 
     get loaded$() {
@@ -83,6 +95,12 @@ export class MapBuilder {
 
     private get mapElement(): HTMLElement {
         return this._mapElement as HTMLElement;
+    }
+
+    reloadSettings() {
+        this.settingService.getListOrRefresh().then((settings) => {
+            this._settingsChanged.next(settings);
+        });
     }
 
     saveShooting() {
@@ -119,8 +137,9 @@ export class MapBuilder {
     }
 
     clear() {
-        this.shooting.arrows.forEach((arrow) => {
-            this.removeArrow(arrow);
+        const arrows = CompareHelper.deepClone(this.shooting.arrows);
+        arrows.forEach((arrow, index) => {
+            this.removeArrow(arrow, index);
         });
 
         this.shooting.arrows = [];
@@ -310,15 +329,14 @@ export class MapBuilder {
         this.checkPageStatus();
     }
 
-    removeArrow(arrow: ArrowModel) {
-        const arrowIndex = this.shooting.arrows.indexOf(arrow);
+    removeArrow(arrow: ArrowModel, index: number) {
         const componentRef = this._components.get(arrow.uid);
 
-        if (arrowIndex > -1 && componentRef) {
+        if (componentRef) {
             const componentIndex = this._viewContainerRef?.indexOf(componentRef.hostView)
             this._viewContainerRef?.remove(componentIndex);
 
-            this.shooting.removeArrow(arrowIndex);
+            this.shooting.removeArrow(index);
             this._components.delete(arrow.uid);
             this.updateShootingCenter();
             this._shootingChanged.next(this.shooting);
@@ -485,10 +503,10 @@ export class MapBuilder {
 
     private removeArrowByPoint(point: CoordinateInterface) {
         const arrowPoint = this.placeArrow(point);
-        const arrow = this.shooting.arrows.find(arrow => arrow.hasPoint(arrowPoint));
+        const index = this.shooting.arrows.findIndex(arrow => arrow.hasPoint(arrowPoint));
 
-        if (arrow) {
-            this.removeArrow(arrow);
+        if (index > -1) {
+            this.removeArrow(this.shooting.arrows[index], index);
         } else {
             throw new Error("Unknown arrow by point")
         }

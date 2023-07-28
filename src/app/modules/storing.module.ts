@@ -5,10 +5,12 @@ import {NgxsStoragePluginModule} from "@ngxs/storage-plugin";
 import {NgxsModule} from "@ngxs/store";
 import {ShootingState} from "@stores";
 import {environment} from "../../environments/environment";
+import {SettingState} from "../stores/setting.state";
 
 
 const states = [
-    ShootingState
+    ShootingState,
+    SettingState
 ];
 
 @NgModule({

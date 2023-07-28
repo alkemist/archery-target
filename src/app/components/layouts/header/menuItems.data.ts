@@ -12,9 +12,6 @@ export const BaseMenuItems: MenuItem[] = [
         icon: 'fa fa-bullseye',
         routerLink: ['/shooting'],
     },
-    {
-        separator: true
-    },
 ]
 
 export const DataModelMenuItems: DataModelMenuItem[] = [

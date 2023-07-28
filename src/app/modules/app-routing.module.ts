@@ -8,7 +8,7 @@ import {
     TitleStrategy,
     UrlTree
 } from "@angular/router";
-import {LoginComponent, ShootingComponent, ShootingsComponent, StatsComponent} from "@components";
+import {LoginComponent, SettingsComponent, ShootingComponent, ShootingsComponent, StatsComponent} from "@components";
 import {AppService, UserService} from "@services";
 import {map, Observable} from "rxjs";
 import {shootingResolver} from "../services/shooting.service";
@@ -44,23 +44,17 @@ const routes: Routes = [
         title: "Login",
     },
     {
-        path: "shooting",
-        component: ShootingComponent,
-        canActivate: [],
-        canDeactivate: [(component: BaseComponent) => component.canDeactivate()],
-        title: "Shooting",
-    },
-    {
         path: "shootings",
         component: ShootingsComponent,
         canActivate: [loggedInGuard],
         title: "Shootings",
     },
     {
-        path: "stats",
-        component: StatsComponent,
-        canActivate: [loggedInGuard],
-        title: "Statistics",
+        path: "shooting",
+        component: ShootingComponent,
+        canActivate: [],
+        canDeactivate: [(component: BaseComponent) => component.canDeactivate()],
+        title: "Shooting",
     },
     {
         path: "shooting/:id",
@@ -69,6 +63,18 @@ const routes: Routes = [
         canDeactivate: [(component: BaseComponent) => component.canDeactivate()],
         resolve: {shooting: shootingResolver},
         title: "Shootings",
+    },
+    {
+        path: "settings",
+        component: SettingsComponent,
+        canActivate: [loggedInGuard],
+        title: "Settings",
+    },
+    {
+        path: "stats",
+        component: StatsComponent,
+        canActivate: [loggedInGuard],
+        title: "Statistics",
     },
 ];
 

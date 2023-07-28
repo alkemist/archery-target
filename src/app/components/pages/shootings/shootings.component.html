@@ -35,6 +35,7 @@
                     <span i18n>Target</span>
                     <p-sortIcon field="target"></p-sortIcon>
                 </th>
+                <th pFrozenColumn style="width: 10%;max-width:200px;"></th>
             </tr>
             <tr>
                 <th pFrozenColumn>
@@ -97,6 +98,7 @@
                         </ng-template>
                     </p-columnFilter>
                 </th>
+                <th></th>
             </tr>
         </ng-template>
         <ng-template let-shooting pTemplate="body">
@@ -107,9 +109,6 @@
                        icon="pi pi-pencil"
                        pButton
                        pRipple></a>
-                    <p-button (onClick)="remove(shooting)"
-                              icon="pi pi-trash"
-                              styleClass="p-button-rounded p-button-danger p-button-text"></p-button>
                 </td>
                 <td pFrozenColumn>
                     {{toShootingModel(shooting).name}}
@@ -128,6 +127,11 @@
                 </td>
                 <td>
                     {{toShootingModel(shooting).target}}
+                </td>
+                <td>
+                    <p-button (onClick)="remove(shooting)"
+                              icon="pi pi-trash"
+                              styleClass="p-button-rounded p-button-danger p-button-text"></p-button>
                 </td>
             </tr>
         </ng-template>
@@ -155,6 +159,9 @@
                 </td>
                 <td>
                     {{ totalArrows() }}
+                </td>
+                <td>
+
                 </td>
                 <td>
 

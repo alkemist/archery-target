@@ -40,7 +40,7 @@
                         <div [class]="'score_' + arrow.score" [style.background]="arrow.color" class="dot"></div>
                         <div>{{ arrow.score }} pts</div>
                     </div>
-                    <p-button (onClick)="mapBuilder.removeArrow(arrow)" icon="pi pi-trash"
+                    <p-button (onClick)="mapBuilder.removeArrow(arrow, i)" icon="pi pi-trash"
                               styleClass="p-button-rounded p-button-text"></p-button>
                 </div>
             </ng-template>
@@ -59,12 +59,12 @@
     <!-- End Toolbar Right -->
 </p-toolbar>
 <p-tieredMenu #menuEl [autoDisplay]="true" [model]="menuItems" [popup]="true"></p-tieredMenu>
-<p-confirmDialog #cd header="Confirmation" i18n-header icon="pi pi-exclamation-triangle" key="shooting">
+<p-confirmDialog #cd header="Confirmation" i18n-header icon="pi pi-exclamation-triangle" key="header">
     <p-footer>
-        <button (click)="cd.reject()" i18n-label icon="pi pi-times" label="No" pButton
+        <button (click)="cd.accept()" class="p-button-danger" i18n-label icon="pi pi-check" label="Yes" pButton
                 pRipple
                 type="button"></button>
-        <button (click)="cd.accept()" class="p-button-danger" i18n-label icon="pi pi-check" label="Yes" pButton
+        <button (click)="cd.reject()" i18n-label icon="pi pi-times" label="No" pButton
                 pRipple
                 type="button"></button>
     </p-footer>

@@ -1,0 +1,99 @@
+<div class="page-container__content h-full">
+    <p-table #dt
+             (sortFunction)="customSort($event)" [customSort]="true" [loading]="loading()"
+             [metaKeySelection]="true"
+             [pageLinks]="2" [paginator]="true" [rows]="50"
+             [scrollable]="true" [sortOrder]="-1" [value]="settings()"
+             breakpoint="400px" dataKey="id" editMode="row"
+             responsiveLayout="scroll" scrollHeight="flex"
+             sortField="distance" styleClass="p-datatable-m">
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="min-width: 13%;max-width:300px;"></th>
+                <th pSortableColumn="distance">
+                    <span i18n>Distance</span>
+                    <p-sortIcon field="distance"></p-sortIcon>
+                </th>
+                <th pSortableColumn="value">
+                    <span i18n>Value</span>
+                    <p-sortIcon field="value"></p-sortIcon>
+                </th>
+                <th style="min-width: 10%;max-width:200px;"></th>
+            </tr>
+        </ng-template>
+        <ng-template let-editing="editing" let-ri="rowIndex" let-setting pTemplate="body">
+            <tr [pEditableRow]="setting">
+                <td style="min-width: 13%;max-width:300px;">
+                    <button (click)="onRowEditInit(setting)" *ngIf="!editing" class="p-button-rounded p-button-text"
+                            icon="pi pi-pencil" pButton pInitEditableRow
+                            pRipple type="button"></button>
+                    <button (click)="onRowEditSave(setting)" *ngIf="editing && setting.id"
+                            class="p-button-rounded p-button-text p-button-success mr-2" icon="pi pi-check" pButton
+                            pRipple
+                            pSaveEditableRow
+                            type="button"></button>
+                    <button (click)="onRowEditSave(setting)" *ngIf="editing && !setting.id"
+                            class="p-button-rounded p-button-text p-button-success mr-2" icon="pi pi-plus" pButton
+                            pRipple
+                            pSaveEditableRow
+                            type="button"></button>
+                    <button (click)="onRowEditCancel(setting, ri)" *ngIf="editing"
+                            class="p-button-rounded p-button-text p-button-danger" icon="pi pi-times" pButton
+                            pCancelEditableRow
+                            pRipple
+                            type="button"></button>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <p-dropdown [(ngModel)]="toSettingModel(setting).distance"
+                                        [autoDisplayFirst]="false"
+                                        [editable]="true"
+                                        [options]="distances">
+                                <ng-template let-selectItem pTemplate="selectedItem">
+                                    {{ selectItem }} m
+                                </ng-template>
+                                <ng-template let-item pTemplate="item">
+                                    {{ item }} m
+                                </ng-template>
+                            </p-dropdown>
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            {{toSettingModel(setting).distance}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <p-inputNumber [(ngModel)]="toSettingModel(setting).value" [minFractionDigits]="1"
+                                           [min]="0"></p-inputNumber>
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            {{toSettingModel(setting).value}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td style="min-width: 10%;max-width:200px;">
+                    <p-button (onClick)="remove(setting)"
+                              icon="pi pi-trash"
+                              styleClass="p-button-rounded p-button-danger p-button-text"></p-button>
+
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="4" i18n>No setting found.</td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="paginatorleft">
+            <p-button (onClick)="add()"
+                      icon="pi pi-plus"
+                      styleClass="p-button-rounded p-button-success p-button-text"></p-button>
+        </ng-template>
+        <ng-template pTemplate="paginatorright">
+
+        </ng-template>
+    </p-table>
+</div>

@@ -178,7 +178,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         if (this.shootingSupervisor.hasChange()) {
             return new Promise<boolean>((resolve) => {
                 this.confirmationService.confirm({
-                    key: "shooting",
+                    key: "header",
                     message: "You have unsaved changes. Are you sure you want to leave this page?",
                     accept: () => {
                         resolve(true);
@@ -208,7 +208,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
     checkBeforeSave() {
         if (this.shooting()?.id && this.shootingSupervisor.hasChange()) {
             this.confirmationService.confirm({
-                key: "shooting",
+                key: "header",
                 message: "Do you want to overwrite the changes?",
                 accept: () => {
                     this.submitShooting();
