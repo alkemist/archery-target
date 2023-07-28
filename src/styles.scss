@@ -175,6 +175,14 @@ p-dropdown.ng-touched.p-invalid > div {
   .p-highlight {
     background: #1E3149 !important;
   }
+
+  &.p-datatable-hoverable-rows {
+    .p-datatable-tbody > tr:not(.p-highlight):hover {
+      .p-frozen-column {
+        background: #141C27 !important;
+      }
+    }
+  }
 }
 
 .loader {
