@@ -8,12 +8,11 @@ import {
     TitleStrategy,
     UrlTree
 } from "@angular/router";
-import {LoginComponent, ShootingComponent} from "@components";
+import {LoginComponent, ShootingComponent, ShootingsComponent, StatsComponent} from "@components";
 import {AppService, UserService} from "@services";
 import {map, Observable} from "rxjs";
 import {shootingResolver} from "../services/shooting.service";
 import BaseComponent from "@base-component";
-import {ShootingsComponent} from "../components/pages/shootings/shootings.component";
 
 const logginInGuard: CanActivateFn = (): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree => {
     const userService = inject(UserService);
@@ -56,6 +55,12 @@ const routes: Routes = [
         component: ShootingsComponent,
         canActivate: [loggedInGuard],
         title: "Shootings",
+    },
+    {
+        path: "stats",
+        component: StatsComponent,
+        canActivate: [loggedInGuard],
+        title: "Statistics",
     },
     {
         path: "shooting/:id",

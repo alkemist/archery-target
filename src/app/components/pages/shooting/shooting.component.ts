@@ -21,6 +21,8 @@ import {combineLatest, shareReplay} from "rxjs";
 import {UserService} from "@services";
 import {ConfirmationService} from "primeng/api";
 import {CompareHelper, FormGroupSupervisor, RecursivePartial} from "@alkemist/ng-form-supervisor";
+import {DISTANCES} from "../../../models/archery/distances";
+import {TARGETS} from "../../../models/archery/targets";
 
 @Component({
     templateUrl: "./shooting.component.html",
@@ -67,6 +69,8 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
     );
 
     deleteModeControl = new FormControl<boolean>(false);
+    distances = DISTANCES;
+    targets = TARGETS;
 
     constructor(
         private userService: UserService,

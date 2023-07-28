@@ -1,15 +1,21 @@
 import {NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
-import {ArrowComponent, BlockableComponent, HeaderComponent, LoginComponent, ShootingComponent} from '@components';
-
-import './app.database';
+import {
+    ArrowComponent,
+    BlockableComponent,
+    CenterComponent,
+    HeaderComponent,
+    LoginComponent,
+    ShootingComponent,
+    ShootingsComponent,
+    StatsComponent
+} from '@components';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppRoutingModule} from './modules/app-routing.module';
 import {StoringModule} from './modules/storing.module';
 import {SharingModule} from './modules/sharing.module';
-import {ShootingsComponent} from "./components/pages/shootings/shootings.component";
-import {CenterComponent} from "./components/center/center.component";
+import './app.database';
 
 @NgModule({
     declarations: [
@@ -17,6 +23,7 @@ import {CenterComponent} from "./components/center/center.component";
         LoginComponent,
         ShootingComponent,
         ShootingsComponent,
+        StatsComponent,
         HeaderComponent,
         BlockableComponent,
         ArrowComponent,

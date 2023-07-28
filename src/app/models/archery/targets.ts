@@ -1,0 +1,1 @@
+export const TARGETS = [40, 60, 80, 122];

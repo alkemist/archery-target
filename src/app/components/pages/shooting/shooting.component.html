@@ -38,16 +38,42 @@
     <form [formGroup]="shootingForm" class="flex flex-column align-items-center gap-4">
         <div class="flex-auto">
             <label class="mb-2 block font-bold">Date</label>
-            <p-calendar [appendTo]="content" [touchUI]="true" dateFormat="dd/mm/yy" formControlName="date"></p-calendar>
+            <p-calendar [appendTo]="content" [touchUI]="true" dateFormat="dd/mm/yy" formControlName="date"
+                        styleClass="inputfield w-full"></p-calendar>
         </div>
         <div class="flex-auto">
             <label class="mb-2 block font-bold">Distance</label>
-            <p-inputNumber [min]="0" formControlName="distance" suffix=" m"></p-inputNumber>
+            <p-dropdown [appendTo]="content"
+                        [autoDisplayFirst]="false"
+                        [editable]="true"
+                        [options]="distances"
+                        formControlName="distance"
+                        styleClass="inputfield w-full">
+                <ng-template let-selectItem pTemplate="selectedItem">
+                    {{ selectItem }} m
+                </ng-template>
+                <ng-template let-item pTemplate="item">
+                    {{ item }} m
+                </ng-template>
+            </p-dropdown>
         </div>
         <div class="flex-auto">
             <label class="mb-2 block font-bold">Target</label>
-            <p-inputNumber [min]="0" formControlName="target" suffix=" cm"></p-inputNumber>
+            <p-dropdown [appendTo]="content"
+                        [autoDisplayFirst]="false"
+                        [editable]="true"
+                        [options]="targets"
+                        formControlName="target"
+                        styleClass="inputfield w-full">
+                <ng-template let-selectItem pTemplate="selectedItem">
+                    {{ selectItem }} cm
+                </ng-template>
+                <ng-template let-item pTemplate="item">
+                    {{ item }} cm
+                </ng-template>
+            </p-dropdown>
         </div>
+
         <p-button (onClick)="submitShooting()" [disabled]="mapBuilder.arrowsCount === 0"
                   class="w-full"
                   icon="pi pi-check"

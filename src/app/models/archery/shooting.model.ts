@@ -188,6 +188,7 @@ export class ShootingModel extends DocumentModel implements HasIdInterface {
     }
 
     reset() {
+        this._id = "";
         this._date = new Date();
         this._arrows = [];
 

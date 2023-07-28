@@ -89,6 +89,35 @@ export class HeaderComponent extends BaseComponent {
                 }
             );
 
+            this.menuItems.push(
+                {
+                    label: $localize`Statistics`,
+                    icon: "pi pi-chart-bar",
+                    routerLink: ['/', 'stats'],
+                }
+            );
+            
+            this.menuItems.push({
+                separator: true
+            });
+
+            this.menuItems.push(
+                {
+                    label: $localize`Other`,
+                    icon: "pi pi-cog",
+                    items: [
+                        {
+                            label: $localize`Invalid shootings`,
+                            icon: "pi pi-refresh",
+                            command: () => {
+                                void this.shootingService.invalidStoredData();
+                                window.location.reload();
+                            }
+                        }
+                    ]
+                }
+            );
+
             DataModelMenuItems.forEach((menuItem) => {
                 this.menuItems.push({
                     ...menuItem, items: [
