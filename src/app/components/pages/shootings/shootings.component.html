@@ -169,15 +169,11 @@
             </tr>
         </ng-template>
         <ng-template pTemplate="paginatorleft">
-            <a [routerLink]="['/', 'shooting']"
-               class="p-button-rounded p-button-success p-button-text"
-               icon="pi pi-plus"
-               pButton
-               pRipple></a>
+
         </ng-template>
         <ng-template pTemplate="paginatorright">
             <div *ngIf="filteredShootings().length > 0">
-                {{ filteredShootings().length }} <span i18n>shootings</span>
+                {{ filteredShootings().length }}
             </div>
         </ng-template>
     </p-table>

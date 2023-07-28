@@ -65,7 +65,8 @@ export class HeaderComponent extends BaseComponent {
             .subscribe((logged) => {
                 this.logged.set(logged);
                 this.loading.set(false);
-                this.buildMenu();
+                
+                this.mapBuilder.reloadSettings();
             });
 
         this.mapBuilder.onShootingChange$
@@ -85,7 +86,6 @@ export class HeaderComponent extends BaseComponent {
                 this.buildMenu(settings);
             });
 
-        this.mapBuilder.reloadSettings();
     }
 
     buildMenu(settings: SettingModel[] = []) {
