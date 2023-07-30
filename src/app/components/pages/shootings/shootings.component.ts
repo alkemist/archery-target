@@ -35,6 +35,11 @@ export class ShootingsComponent extends BaseComponent {
             ? this.selectedShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.arrows.length, 0)
             : this.filteredShootings().reduce((total: number, shooting: ShootingModel) => total + shooting.arrows.length, 0)
     );
+    showFooter = computed<boolean>(() =>
+        this.selectedShootings().length > 1 ||
+        this.filteredShootings().length > 1
+        && this.filteredShootings().length !== this.shootings().length
+    );
 
     distances = DISTANCES;
     targets = TARGETS;
@@ -76,6 +81,7 @@ export class ShootingsComponent extends BaseComponent {
 
     onFilter($event: any) {
         this.filteredShootings.set($event.filteredValue);
+        this.selectedShootings.set([]);
     }
 
     onSelection(selectedShootings: ShootingModel[]) {

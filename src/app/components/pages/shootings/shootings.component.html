@@ -2,7 +2,7 @@
     <p-table #dt (onFilter)="onFilter($event)" (selectionChange)="onSelection($event)"
              (sortFunction)="customSort($event)"
              [customSort]="true" [loading]="loading()"
-             [metaKeySelection]="true" [pageLinks]="2" [paginator]="filteredShootings().length > 0"
+             [metaKeySelection]="true" [pageLinks]="2" [paginator]="true"
              [rows]="50" [scrollable]="true"
              [selection]="selectedShootings()" [value]="shootings()"
              breakpoint="400px" dataKey="id" responsiveLayout="scroll"
@@ -35,7 +35,7 @@
                     <span i18n>Target</span>
                     <p-sortIcon field="target"></p-sortIcon>
                 </th>
-                <th pFrozenColumn style="width: 10%;max-width:200px;"></th>
+                <th style="width: 10%;max-width:200px;"></th>
             </tr>
             <tr>
                 <th pFrozenColumn>
@@ -57,7 +57,7 @@
                                     type="number">
                         <ng-template let-filter="filterCallback" let-value pTemplate="filter">
                             <p-dropdown (onChange)="filter($event.value)" [ngModel]="value" [options]="distances"
-                                        [showClear]="false" placeholder="Any">
+                                        [showClear]="true" placeholder="Any">
                                 <ng-template let-option pTemplate="item">
                                     {{ option }}
                                 </ng-template>
@@ -95,7 +95,7 @@
                                     type="number">
                         <ng-template let-filter="filterCallback" let-value pTemplate="filter">
                             <p-dropdown (onChange)="filter($event.value)" [ngModel]="value" [options]="targets"
-                                        [showClear]="false" placeholder="Any">
+                                        [showClear]="true" placeholder="Any">
                                 <ng-template let-option pTemplate="item">
                                     {{ option }}
                                 </ng-template>
@@ -108,7 +108,7 @@
         </ng-template>
         <ng-template let-shooting pTemplate="body">
             <tr [pSelectableRow]="shooting">
-                <td class="align-right" pFrozenColumn>
+                <td pFrozenColumn>
                     <a [routerLink]="['/', 'shooting', shooting.id]"
                        class="p-button-rounded p-button-success p-button-text"
                        icon="pi pi-pencil"
@@ -142,11 +142,11 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="7" i18n>No shooting found.</td>
+                <td colspan="8" i18n>No shooting found.</td>
             </tr>
         </ng-template>
         <ng-template pTemplate="footer">
-            <tr *ngIf="filteredShootings().length > 0">
+            <tr *ngIf="showFooter()">
                 <td pFrozenColumn>
 
                 </td>
