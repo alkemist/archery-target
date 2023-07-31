@@ -3,4 +3,11 @@
 .page-container__content {
   padding: 20px;
   height: 100%;
+
+  ::ng-deep {
+    .p-tabview-panels, .p-tabview-panel {
+      height: 100%;
+      display: flex;
+    }
+  }
 }

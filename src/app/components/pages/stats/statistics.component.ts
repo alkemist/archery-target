@@ -63,7 +63,9 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                 this.statistics = statisticData.statistics;
 
                 //this.chartOptions = new Map<number, Map<number, Charts>>();
-                const series: SeriesOption[] = [];
+                const scoreSeries: SeriesOption[] = [],
+                    arrowsSeries: SeriesOption[] = [];
+                const configurations: string[] = [];
                 const lines: string[] = [];
                 const dates = statisticData.dates;
                 const baseOptions: EChartsOption = {
@@ -72,63 +74,25 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                         trigger: 'axis'
                     },
                     grid: {
-                        left: '3%',
-                        right: '4%',
-                        bottom: '3%',
-                        containLabel: true
+                        bottom: '20%'
                     },
-                }
-
-                this.statistics.forEach((statisticsByDistance, distance) => {
-
-                    statisticsByDistance.forEach((statisticsByTarget, target) => {
-                        //const dates = [...statisticsByTarget.keys()];
-                        const averagesScore = [...statisticsByTarget.values()].map((value) => value.averageScore);
-                        const averagesGroup = [...statisticsByTarget.values()].map((value) => value.averageGroup);
-                        const averagesArrow = [...statisticsByTarget.values()].map((value) => value.averageArrow);
-
-                        const line = `${distance} m - ${target} cm`;
-                        if (lines.indexOf(line) === -1) {
-                            lines.push(line);
-                        }
-
-                        series.push({
-                            name: line,
-                            type: 'line',
-                            smooth: true,
-                            data: dates.map(date => ({
-                                name: DateHelper.secondToName(date),
-                                value: statisticsByTarget.get(date)?.averageScore as number
-                            }))
-                        })
-                    });
-                });
-
-                this.chartOptions['score'] = {
-                    ...baseOptions,
                     title: {
-                        text: 'Score / 360',
                         textStyle: {
                             color: '#fff'
                         }
                     },
                     legend: {
-                        data: lines,
                         textStyle: {
                             color: '#fff'
                         },
+                        orient: 'horizontal',
                         itemGap: 50,
-                        right: 0
+                        bottom: 0
                     },
                     xAxis: {
-                        type: 'category',
-                        boundaryGap: false,
-                        data: dates.map(date => DateHelper.secondToName(date)),
+                        //boundaryGap: false,
                     },
                     yAxis: {
-                        type: 'value',
-                        min: 0,
-                        max: 360,
                         splitLine: {
                             show: true,
                             lineStyle: {
@@ -144,8 +108,77 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                                 opacity: 0.2
                             }
                         }
+                    }
+                };
+                const baseSerie = {
+                    smooth: true,
+                }
+                const colors = [
+                    'red', 'blue', 'yellow', 'green', 'orange'
+                ];
+
+                this.statistics.forEach((statisticsByDistance, distance) => {
+                    statisticsByDistance.forEach((statisticsByTarget, target) => {
+                        //const dates = [...statisticsByTarget.keys()];
+                        const averagesScore = [...statisticsByTarget.values()].map((value) => value.averageScore);
+                        const averagesGroup = [...statisticsByTarget.values()].map((value) => value.averageGroup);
+                        const averagesArrow = [...statisticsByTarget.values()].map((value) => value.averageArrow);
+
+                        const configuration = `${distance} m - ${target} cm`;
+                        const scoreLine = `Score ${configuration}`;
+                        const arrowsLine = `Arrow ${configuration}`;
+
+                        if (configurations.indexOf(configuration) === -1) {
+                            configurations.push(configuration);
+                            lines.push(scoreLine)
+                            lines.push(arrowsLine)
+                        }
+
+                        scoreSeries.push({
+                            ...baseSerie,
+                            name: scoreLine,
+                            type: 'line',
+                            color: colors[configurations.indexOf(configuration)],
+                            data: dates.map(date => ({
+                                name: DateHelper.secondToName(date),
+                                value: statisticsByTarget.get(date)?.averageScore as number
+                            }))
+                        })
+
+                        scoreSeries.push({
+                            name: arrowsLine,
+                            type: 'bar',
+                            color: colors[configurations.indexOf(configuration)],
+                            data: dates.map(date => ({
+                                name: DateHelper.secondToName(date),
+                                value: statisticsByTarget.get(date)?.arrows as number
+                            }))
+                        })
+                    });
+                });
+
+                this.chartOptions['score'] = {
+                    ...baseOptions,
+                    title: {
+                        ...baseOptions.title,
+                        text: 'Score / 360',
                     },
-                    series: series
+                    legend: {
+                        ...baseOptions.legend,
+                        data: lines,
+                    },
+                    xAxis: {
+                        ...baseOptions.xAxis,
+                        type: 'category',
+                        data: dates.map(date => DateHelper.secondToName(date)),
+                    },
+                    yAxis: {
+                        ...baseOptions.yAxis,
+                        type: 'value',
+                        min: 0,
+                        max: 360,
+                    },
+                    series: scoreSeries
                 };
             }
 
