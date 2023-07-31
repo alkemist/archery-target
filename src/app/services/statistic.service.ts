@@ -1,6 +1,6 @@
 import {DatastoreService} from "./datastore.service";
 import {inject, Injectable} from "@angular/core";
-import {StatisticCalcul, StatisticModel, StatisticStoredInterface} from "@models";
+import {StatisticModel, StatisticStoredInterface} from "@models";
 import {Select, Store} from "@ngxs/store";
 import {LoggerService} from "./logger.service";
 import {ActivatedRouteSnapshot, ResolveFn} from "@angular/router";
@@ -14,10 +14,15 @@ import {
     StatisticState,
     UpdateStatistic
 } from "@stores";
-import {ArrayHelper, MathHelper} from "@tools";
+import {ArrayHelper, DateHelper, MathHelper} from "@tools";
 import {ShootingService} from "./shooting.service";
 
-export type StatisticsData = Map<number, Map<number, Map<string, StatisticModel>>>
+export interface StatisticsData {
+    statistics: Map<number, Map<number, Map<number, StatisticModel>>>
+    distances: number[]
+    targets: number[]
+    dates: number[]
+}
 
 @Injectable({
     providedIn: 'root'
@@ -35,17 +40,21 @@ export class StatisticService extends DatastoreService<StatisticStoredInterface,
             AddStatistic, UpdateStatistic, RemoveStatistic, FillStatistics, InvalideStatistics);
     }
 
-    async lastByDistanceAndTarget(distance: number, target: number) {
+    async getByDistanceTargetDate(distance: number, target: number, dateStr: string) {
         const statistics = (await this.getListOrRefresh())
             .filter(statistic =>
                 statistic.distance === distance
-                && statistic.target === target)
+                && statistic.target === target
+                && statistic.name === dateStr
+            )
         if (statistics.length === 0) return null;
 
-        return ArrayHelper.sortBy(statistics, 'dateSeconds')[0];
+        return ArrayHelper.sortBy(statistics, 'dateSeconds', -1)[0];
     }
 
     async getStatistics(): Promise<StatisticsData | null> {
+        const map = new Map<number, Map<number, string>>();
+
         const lastShooting = await this.shootingService.last('dateSeconds');
 
         if (lastShooting) {
@@ -55,124 +64,144 @@ export class StatisticService extends DatastoreService<StatisticStoredInterface,
     }
 
     async calculStatistics(dateSeconds: number): Promise<StatisticsData> {
-        const distances: number[] = [], targets: number[] = [];
-        const statsCalculByDistanceAndTarget = new Map<number, Map<number, StatisticCalcul>>;
-        const statsByDistanceAndTarget = new Map<number, Map<number, Map<string, StatisticModel>>>;
+        const distances: number[] = [], targets: number[] = [], dates: number[] = [];
+        const statsByDistanceTargetDate = new Map<number, Map<number, Map<number, StatisticModel>>>;
 
-        const shootings = await this.shootingService.getListOrRefresh();
-        await ArrayHelper.sortBy(shootings, 'dateSeconds').forEach((shooting) => {
-            let byDistance = statsCalculByDistanceAndTarget.get(shooting.distance ?? 0);
+        let lastStatistic = await this.last('dateSeconds');
+
+        const shootings = await (lastStatistic
+                ? this.shootingService.listAfterDate(DateHelper.reset(new Date(lastStatistic?.dateSeconds ?? 0)).getTime())
+                : this.shootingService.getListOrRefresh()
+        );
+
+        for await (const shooting of shootings) {
+            const distance = shooting.distance as number;
+            const target = shooting.target as number;
+            const dateSeconds = DateHelper.reset(new Date(shooting.dateSeconds)).getTime();
+
+            let byDistance = statsByDistanceTargetDate.get(distance);
             if (!byDistance) {
-                byDistance = new Map<number, StatisticCalcul>();
-                statsCalculByDistanceAndTarget.set(shooting.distance ?? 0, byDistance);
+                byDistance = new Map<number, Map<number, StatisticModel>>();
+                statsByDistanceTargetDate.set(distance, byDistance);
             }
 
-            let byTarget = byDistance.get(shooting.target ?? 0);
+            let byTarget = byDistance.get(target);
             if (!byTarget) {
-                byTarget = {
-                    max: {score: 0},
-                    average: {score: 0, group: 0, arrow: 0},
-                    total: {
-                        score: 0,
-                        group: 0,
-                        arrows: 0,
-                        scoreShootings: 0,
-                        groupArrows: 0,
-                    }
-                } as StatisticCalcul;
-                byDistance.set(shooting.target ?? 0, byTarget);
+                byTarget = new Map<number, StatisticModel>();
+                byDistance.set(target, byTarget);
             }
 
-            byTarget.total.score += shooting.score;
+            let statistic = byTarget.get(dateSeconds) ?? null;
+            if (!statistic) {
+                statistic = new StatisticModel({
+                    target,
+                    distance,
+                    dateSeconds,
+                });
+
+                byTarget.set(dateSeconds, statistic);
+            }
+
+            statistic.arrows += shooting.arrows.length;
+            statistic.totalScore += shooting.score;
 
             if (shooting.groupingScore) {
-                byTarget.total.group += (shooting.groupingScore * shooting.arrows.length);
-                byTarget.total.groupArrows += shooting.arrows.length;
-            }
-
-            byTarget.total.arrows += shooting.arrows.length;
-            byTarget.total.scoreShootings++;
-        });
-
-        for await (const [distance, byDistance] of statsCalculByDistanceAndTarget) {
-            for await (const [target, byTarget] of byDistance) {
-                const shootings = MathHelper.round(
-                    byTarget.total.arrows / 36
-                );
-
-                const averageScore = MathHelper.round(
-                    byTarget.total.score / shootings, 0
-                )
-
-                const averageGroup = MathHelper.round(
-                    (byTarget.total.group / byTarget.total.groupArrows), 0
-                )
-
-                const averageArrow = MathHelper.round(
-                    byTarget.total.score / byTarget.total.arrows, 1
-                )
-
-
-                const lastShooting = await this.shootingService.lastByDistanceAndTarget(distance, target);
-                let statistic = await this.lastByDistanceAndTarget(distance, target);
-
-                /*console.log('- Check', distance, target);
-                console.log('-- timing', lastShooting?.dateSeconds, statistic?.dateSeconds);
-                console.log('-- arrows', statistic?.arrows, byTarget.total.arrows)*/
-
-                if (!statistic || lastShooting && lastShooting?.dateSeconds > statistic.dateSeconds) {
-                    statistic = new StatisticModel({
-                        dateSeconds: lastShooting?.dateSeconds ?? dateSeconds,
-                        distance,
-                        target,
-                        averageScore,
-                        averageGroup,
-                        averageArrow,
-                        arrows: byTarget.total.arrows
-                    });
-
-                    console.log('-- Add', statistic.dateSeconds)
-                    await this.add(statistic);
-                } else if (statistic && lastShooting
-                    && lastShooting?.dateSeconds === statistic.dateSeconds
-                    && byTarget.total.arrows > statistic.arrows
-                ) {
-                    statistic.dateSeconds = lastShooting.dateSeconds;
-                    statistic.averageScore = averageScore;
-                    statistic.averageGroup = averageGroup;
-                    statistic.averageArrow = averageArrow;
-                    statistic.arrows = byTarget.total.arrows;
-
-                    //console.log('-- Update', statistic.dateSeconds)
-                    await this.update(statistic);
-                }
-
-                let statsByDistance = statsByDistanceAndTarget.get(distance);
-                if (!statsByDistance) {
-                    statsByDistance = new Map<number, Map<string, StatisticModel>>();
-                    statsByDistanceAndTarget.set(distance, statsByDistance);
-
-                    if (distances.indexOf(statistic.distance) === -1) {
-                        distances.push(statistic.distance);
-                    }
-                }
-
-                let statsByTarget = statsByDistance.get(target);
-                if (!statsByTarget) {
-                    statsByTarget = new Map<string, StatisticModel>();
-                    statsByDistance.set(target, statsByTarget);
-
-                    if (targets.indexOf(statistic.target) === -1) {
-                        targets.push(statistic.target);
-                    }
-                }
-
-                statsByTarget.set(statistic.dateStr, statistic);
+                statistic.totalGroup += shooting.groupingScore ?? 0;
+                statistic.countGroup++;
             }
         }
 
+        for await (const [distance, byDistance] of statsByDistanceTargetDate) {
+            distances.push(distance);
 
-        return statsByDistanceAndTarget;
+            for await (const [target, byTarget] of byDistance) {
+                if (targets.indexOf(target) === -1) {
+                    targets.push(target);
+                }
+
+                for await (const [date, statistic] of byTarget) {
+                    if (dates.indexOf(date) === -1) {
+                        dates.push(date);
+                    }
+
+                    const shootingCount = MathHelper.round(
+                        statistic.arrows / 36
+                    );
+
+                    statistic.averageScore = MathHelper.round(
+                        statistic.totalScore / shootingCount, 0
+                    );
+
+                    statistic.averageGroup = MathHelper.round(
+                        statistic.totalGroup / statistic.countGroup, 0
+                    );
+
+                    statistic.averageArrow = MathHelper.round(
+                        statistic.totalScore / statistic.arrows, 1
+                    );
+
+                    let currentStatistic =
+                        await this.getByDistanceTargetDate(distance, target, statistic.name);
+
+                    if (!currentStatistic) {
+                        //console.log(`[${distance} - ${target} - ${date}]`, 'Add', statistic)
+                        await this.add(statistic);
+                    } else if (currentStatistic.arrows !== statistic.arrows) {
+                        const statisticUpdated = new StatisticModel({
+                            id: currentStatistic.id,
+                            ...statistic.toFirestore(),
+                        });
+
+                        //console.log(`[${distance} - ${target} - ${date}]`, 'Update', statisticUpdated, currentStatistic);
+                        await this.update(statisticUpdated);
+                    } else {
+                        //console.log(`[${distance} - ${target} - ${date}]`, 'Nothing', statistic, currentStatistic)
+                    }
+                }
+            }
+        }
+
+        (await this.getListOrRefresh()).forEach((statistic) => {
+            const distance = statistic.distance as number;
+            const target = statistic.target as number;
+            const dateSeconds = statistic.dateSeconds;
+
+            let byDistance = statsByDistanceTargetDate.get(distance);
+            if (!byDistance) {
+                byDistance = new Map<number, Map<number, StatisticModel>>();
+                statsByDistanceTargetDate.set(distance, byDistance);
+
+                if (distances.indexOf(distance) === -1) {
+                    distances.push(distance);
+                }
+            }
+
+            let byTarget = byDistance.get(target);
+            if (!byTarget) {
+                byTarget = new Map<number, StatisticModel>();
+                byDistance.set(target, byTarget);
+
+                if (targets.indexOf(target) === -1) {
+                    targets.push(target);
+                }
+            }
+
+            let currentStatistic = byTarget.get(dateSeconds) ?? null;
+            if (!currentStatistic) {
+                byTarget.set(dateSeconds, statistic);
+
+                if (dates.indexOf(dateSeconds) === -1) {
+                    dates.push(dateSeconds);
+                }
+            }
+        })
+
+        return {
+            statistics: statsByDistanceTargetDate,
+            distances,
+            targets,
+            dates: ArrayHelper.sort(dates),
+        };
     }
 }
 

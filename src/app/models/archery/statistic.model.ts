@@ -3,6 +3,10 @@ import {StatisticBackInterface, StatisticStoredInterface} from "./statistic.inte
 import {DateHelper, slugify} from "@tools";
 
 export class StatisticModel extends DocumentModel implements HasIdInterface {
+    totalScore = 0;
+    totalGroup = 0;
+    countGroup = 0;
+
     private _distance: number;
     private _target: number;
     private _dateSeconds: number;

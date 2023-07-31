@@ -1,5 +1,5 @@
 <blockable #lockable class="page-container__content flex flex-column align-items-stretch gap-1">
-    <p-tabView (activeIndexChange)="activeDistanceIndexChange()" *ngIf="!(loading())"
+    <!--<p-tabView (activeIndexChange)="activeDistanceIndexChange()" *ngIf="!(loading())"
                [(activeIndex)]="activeDistanceIndex">
         <p-tabPanel *ngFor="let distance of distances; let i = index" [header]="distance + ' m'">
             <p-tabView (activeIndexChange)="activeTargetIndexChange()" [(activeIndex)]="activeTargetIndex">
@@ -23,6 +23,25 @@
                     </p-tabView>
                 </p-tabPanel>
             </p-tabView>
+        </p-tabPanel>
+    </p-tabView>-->
+
+    <p-tabView [(activeIndex)]="activeTypeIndex">
+        <p-tabPanel header="Score">
+            <div *ngIf="activeTypeIndex === 0"
+                 [options]="getOptions('score')" echarts></div>
+        </p-tabPanel>
+        <p-tabPanel header="Group">
+            <div *ngIf="activeTypeIndex === 1"
+                 [options]="getOptions('group')" echarts></div>
+        </p-tabPanel>
+        <p-tabPanel header="Arrow">
+            <div *ngIf="activeTypeIndex === 2"
+                 [options]="getOptions('arrow')" echarts></div>
+        </p-tabPanel>
+        <p-tabPanel header="Arrows">
+            <div *ngIf="activeTypeIndex === 3"
+                 [options]="getOptions('arrows')" echarts></div>
         </p-tabPanel>
     </p-tabView>
 </blockable>

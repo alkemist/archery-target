@@ -1,15 +1,12 @@
 import {AfterViewInit, ChangeDetectionStrategy, Component, OnInit, signal} from "@angular/core";
 import BaseComponent from "@base-component";
 import {StatisticService} from "../../../services/statistic.service";
-import {EChartsOption} from "echarts";
+import {EChartsOption, SeriesOption} from "echarts";
 import {StatisticModel} from "@models";
-import {ArrayHelper} from "@tools";
+import {ArrayHelper, DateHelper} from "@tools";
 
-interface Charts {
-    arrow: EChartsOption,
-    group: EChartsOption,
-    score: EChartsOption,
-}
+type ChartType = 'arrow' | 'score' | 'group' | 'arrows';
+type Charts = Record<ChartType, EChartsOption>
 
 @Component({
     templateUrl: "./statistics.component.html",
@@ -25,12 +22,18 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
     arrowsByMonth = new Map<string, number>();
 
     loading = signal<boolean>(true);
-    statistics: Map<number, Map<number, Map<string, StatisticModel>>> | null = null;
+    statistics: Map<number, Map<number, Map<number, StatisticModel>>> | null = null;
     activeDistanceIndex = 0;
     activeTargetIndex = 0;
     activeTypeIndex = 0;
 
-    chartOptions = new Map<number, Map<number, Charts>>();
+    //chartOptions = new Map<number, Map<number, Charts>>();
+    chartOptions: Charts = {
+        score: {},
+        group: {},
+        arrow: {},
+        arrows: {},
+    };
 
     constructor(
         private statisticService: StatisticService,
@@ -54,82 +57,103 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
 
     async ngAfterViewInit() {
         this.statisticService.getStatistics().then((statisticData) => {
-            if (statisticData) {
-                this.statistics = statisticData;
+            console.log(statisticData);
 
-                this.chartOptions = new Map<number, Map<number, Charts>>();
+            if (statisticData) {
+                this.statistics = statisticData.statistics;
+
+                //this.chartOptions = new Map<number, Map<number, Charts>>();
+                const series: SeriesOption[] = [];
+                const lines: string[] = [];
+                const dates = statisticData.dates;
+                const baseOptions: EChartsOption = {
+                    darkMode: true,
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                }
+
                 this.statistics.forEach((statisticsByDistance, distance) => {
-                    let optionByDistance = this.chartOptions.get(distance);
-                    if (!optionByDistance) {
-                        optionByDistance = new Map<number, Charts>();
-                        this.chartOptions.set(distance, optionByDistance);
-                    }
 
                     statisticsByDistance.forEach((statisticsByTarget, target) => {
-                        const dates = [...statisticsByTarget.keys()];
+                        //const dates = [...statisticsByTarget.keys()];
                         const averagesScore = [...statisticsByTarget.values()].map((value) => value.averageScore);
                         const averagesGroup = [...statisticsByTarget.values()].map((value) => value.averageGroup);
                         const averagesArrow = [...statisticsByTarget.values()].map((value) => value.averageArrow);
 
-                        const baseOptions: EChartsOption = {
-                            yAxis: {
-                                type: 'value',
-                            },
+                        const line = `${distance} m - ${target} cm`;
+                        if (lines.indexOf(line) === -1) {
+                            lines.push(line);
                         }
 
-                        optionByDistance?.set(target, {
-                            score: {
-                                ...baseOptions,
-                                xAxis: {
-                                    type: 'category',
-                                    data: dates,
-                                },
-                                series: [
-                                    {
-                                        data: averagesScore,
-                                        type: 'line',
-                                        smooth: true
-                                    },
-                                ],
-                            },
-                            group: {
-                                ...baseOptions,
-                                xAxis: {
-                                    type: 'category',
-                                    data: dates,
-                                },
-                                series: [
-                                    {
-                                        data: averagesGroup,
-                                        type: 'line',
-                                        smooth: true
-                                    },
-                                ],
-                            },
-                            arrow: {
-                                ...baseOptions,
-                                xAxis: {
-                                    type: 'category',
-                                    data: dates,
-                                },
-                                series: [
-                                    {
-                                        data: averagesArrow,
-                                        type: 'line',
-                                        smooth: true
-                                    },
-                                ],
-                            },
-                        });
+                        series.push({
+                            name: line,
+                            type: 'line',
+                            smooth: true,
+                            data: dates.map(date => ({
+                                name: DateHelper.secondToName(date),
+                                value: statisticsByTarget.get(date)?.averageScore as number
+                            }))
+                        })
                     });
-                })
+                });
+
+                this.chartOptions['score'] = {
+                    ...baseOptions,
+                    title: {
+                        text: 'Score / 360',
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    legend: {
+                        data: lines,
+                        textStyle: {
+                            color: '#fff'
+                        },
+                        itemGap: 50,
+                        right: 0
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: dates.map(date => DateHelper.secondToName(date)),
+                    },
+                    yAxis: {
+                        type: 'value',
+                        min: 0,
+                        max: 360,
+                        splitLine: {
+                            show: true,
+                            lineStyle: {
+                                color: "rgba(255,255,255)",
+                                opacity: 1
+                            }
+                        },
+                        minorSplitLine: {
+                            show: true,
+                            lineStyle: {
+                                type: "dashed",
+                                color: "rgba(255,255,255)",
+                                opacity: 0.2
+                            }
+                        }
+                    },
+                    series: series
+                };
             }
 
             this.loading.set(false);
         })
     }
 
-    getOptions(distance: any, target: any, type: 'arrow' | 'score' | 'group') {
+    /*getOptions(distance: any, target: any, type: 'arrow' | 'score' | 'group') {
         const options = this.chartOptions.get(distance)?.get(target);
 
         if (options) {
@@ -137,6 +161,9 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
         }
 
         return {};
+    }*/
+    getOptions(type: ChartType) {
+        return this.chartOptions[type];
     }
 
     activeDistanceIndexChange() {

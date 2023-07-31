@@ -62,7 +62,6 @@ export class SettingsComponent extends BaseComponent {
 
     onRowEditInit(setting: SettingModel) {
         this.clonedSettings[setting.id] = CompareHelper.deepClone(setting);
-        console.log("Row edit init", setting);
     }
 
     onRowEditSave(setting: SettingModel) {

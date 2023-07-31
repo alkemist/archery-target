@@ -106,7 +106,7 @@ export abstract class DatastoreService<
         const shootings = await this.getListOrRefresh();
         if (shootings.length === 0) return null;
 
-        return ArrayHelper.sortBy(shootings, sortField)[0];
+        return ArrayHelper.sortBy(shootings, sortField, -1)[0];
     }
 
     async search(query: string): Promise<M[]> {

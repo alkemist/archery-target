@@ -10,4 +10,12 @@ export abstract class DateHelper {
     static secondToName(second: number) {
         return DateHelper.dateToName(new Date(second))
     }
+
+    static reset(date: Date) {
+        date.setHours(0);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        return date;
+    }
 }

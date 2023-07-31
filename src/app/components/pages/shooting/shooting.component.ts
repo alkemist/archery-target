@@ -214,9 +214,6 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
     private submitShooting() {
         const isNew = !this.shooting()?.id;
 
-        console.log("valid ?", this.shootingForm.valid)
-        console.log("value", this.shootingForm.value)
-
         this.mapBuilder.saveShooting().then((shootingStored) => {
             this.modalOpened = false;
             this.shootingSupervisor.resetInitialValue();

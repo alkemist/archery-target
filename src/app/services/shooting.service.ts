@@ -31,7 +31,12 @@ export class ShootingService extends DatastoreService<ShootingStoredInterface, S
                 && shooting.target === target)
         if (shootings.length === 0) return null;
 
-        return ArrayHelper.sortBy(shootings, 'dateSeconds')[0];
+        return ArrayHelper.sortBy(shootings, 'dateSeconds', -1)[0];
+    }
+
+    async listAfterDate(dateSeconds: number) {
+        return (await this.getListOrRefresh())
+            .filter(shooting => shooting.dateSeconds >= dateSeconds)
     }
 }
 
