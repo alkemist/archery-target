@@ -3,14 +3,14 @@ import {NgxsReduxDevtoolsPluginModule} from "@ngxs/devtools-plugin";
 import {NgxsLoggerPluginModule} from "@ngxs/logger-plugin";
 import {NgxsStoragePluginModule} from "@ngxs/storage-plugin";
 import {NgxsModule} from "@ngxs/store";
-import {ShootingState} from "@stores";
+import {SettingState, ShootingState, StatisticState} from "@stores";
 import {environment} from "../../environments/environment";
-import {SettingState} from "../stores/setting.state";
 
 
 const states = [
     ShootingState,
-    SettingState
+    SettingState,
+    StatisticState
 ];
 
 @NgModule({

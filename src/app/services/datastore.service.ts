@@ -102,6 +102,13 @@ export abstract class DatastoreService<
         return this.all;
     }
 
+    async last(sortField: keyof M = 'id') {
+        const shootings = await this.getListOrRefresh();
+        if (shootings.length === 0) return null;
+
+        return ArrayHelper.sortBy(shootings, sortField)[0];
+    }
+
     async search(query: string): Promise<M[]> {
         const documents = await this.getListOrRefresh();
         return documents.filter((document: M) => {

@@ -6,8 +6,7 @@ import {LoggerService} from "./logger.service";
 import {ActivatedRouteSnapshot, ResolveFn} from "@angular/router";
 import {MessageService} from "primeng/api";
 import {Observable} from "rxjs";
-import {SettingState} from "../stores/setting.state";
-import {AddSetting, FillSettings, InvalideSettings, RemoveSetting, UpdateSetting} from "../stores/setting.action";
+import {AddSetting, FillSettings, InvalideSettings, RemoveSetting, SettingState, UpdateSetting} from "@stores";
 
 @Injectable({
     providedIn: 'root'

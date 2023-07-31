@@ -7,6 +7,7 @@ import {ActivatedRouteSnapshot, ResolveFn} from "@angular/router";
 import {AddShooting, FillShootings, InvalideShootings, RemoveShooting, ShootingState, UpdateShooting} from "@stores";
 import {MessageService} from "primeng/api";
 import {Observable} from "rxjs";
+import {ArrayHelper} from "@tools";
 
 @Injectable({
     providedIn: 'root'
@@ -21,6 +22,16 @@ export class ShootingService extends DatastoreService<ShootingStoredInterface, S
                 store: Store) {
         super(messageService, loggerService, 'shooting', $localize`shooting`, ShootingModel, store,
             AddShooting, UpdateShooting, RemoveShooting, FillShootings, InvalideShootings);
+    }
+
+    async lastByDistanceAndTarget(distance: number, target: number) {
+        const shootings = (await this.getListOrRefresh())
+            .filter(shooting =>
+                shooting.distance === distance
+                && shooting.target === target)
+        if (shootings.length === 0) return null;
+
+        return ArrayHelper.sortBy(shootings, 'dateSeconds')[0];
     }
 }
 

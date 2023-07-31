@@ -14,7 +14,7 @@ import {
 import BaseComponent from "@base-component";
 import {MapBuilder} from "../../../services/map.builder";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {FormArray, FormControl, FormGroup} from "@angular/forms";
+import {FormArray, FormControl, FormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ArrowInterface, ShootingFormInterface, ShootingModel} from "@models";
 import {combineLatest, shareReplay} from "rxjs";
@@ -49,8 +49,8 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
 
     shootingForm = new FormGroup({
         date: new FormControl<Date | null>(new Date()),
-        distance: new FormControl<number | null>(null),
-        target: new FormControl<number | null>(null),
+        distance: new FormControl<number | null>(null, [Validators.required]),
+        target: new FormControl<number | null>(null, [Validators.required]),
         arrows: new FormArray([
             new FormControl<ArrowInterface | null>({
                 x: 0,
@@ -60,7 +60,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
                 score: 0,
                 center: {x: 0, y: 0},
             } as ArrowInterface)
-        ])
+        ], [Validators.required])
     });
 
     shootingSupervisor = new FormGroupSupervisor(
@@ -130,6 +130,7 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
                     );
 
                     this.shootingSupervisor.setValue(shooting.toFormData(), {emitEvent: false});
+
                     this.shootingSupervisor.resetInitialValue();
                 });
 
@@ -138,6 +139,10 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
             .subscribe(() => {
                 this.mapBuilder.updateShootingByForm(this.shootingForm.value as RecursivePartial<ArrowInterface>);
             })
+    }
+
+    get valid(): boolean {
+        return this.shootingForm.valid;
     }
 
     get modalOpened(): boolean {
@@ -192,19 +197,6 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         return true;
     }
 
-    submitShooting() {
-        const isNew = !this.shooting()?.id;
-
-        this.mapBuilder.saveShooting().then((shootingStored) => {
-            this.modalOpened = false;
-            this.shootingSupervisor.resetInitialValue();
-
-            if (isNew) {
-                void this.router.navigate(['shooting', shootingStored.id]);
-            }
-        })
-    }
-
     checkBeforeSave() {
         if (this.shooting()?.id && this.shootingSupervisor.hasChange()) {
             this.confirmationService.confirm({
@@ -217,5 +209,21 @@ export class ShootingComponent extends BaseComponent implements OnInit, AfterVie
         } else {
             this.submitShooting();
         }
+    }
+
+    private submitShooting() {
+        const isNew = !this.shooting()?.id;
+
+        console.log("valid ?", this.shootingForm.valid)
+        console.log("value", this.shootingForm.value)
+
+        this.mapBuilder.saveShooting().then((shootingStored) => {
+            this.modalOpened = false;
+            this.shootingSupervisor.resetInitialValue();
+
+            if (isNew) {
+                void this.router.navigate(['shooting', shootingStored.id]);
+            }
+        })
     }
 }

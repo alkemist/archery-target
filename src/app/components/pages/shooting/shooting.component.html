@@ -20,7 +20,7 @@
                     offIcon="fa fa-trash"
                     onIcon="fa fa-trash"
                     styleClass="p-button-rounded p-button-danger"></p-toggleButton>
-    <p-button (onClick)="checkBeforeSave()" *ngIf="logged()" [disabled]="!shootingSupervisor.hasChange()"
+    <p-button (onClick)="checkBeforeSave()" *ngIf="logged()" [disabled]="!shootingSupervisor.hasChange() || !valid"
               [icon]="'pi pi-' + (shooting()?.id ? 'check' : 'plus')"
               styleClass="p-button-rounded p-button-danger"></p-button>
     <p-button (onClick)="mapBuilder.modalOpened.set(true)" *ngIf="logged()"
@@ -75,7 +75,7 @@
             </p-dropdown>
         </div>
 
-        <p-button (onClick)="submitShooting()" [disabled]="mapBuilder.arrowsCount === 0"
+        <p-button (onClick)="checkBeforeSave()" [disabled]="!valid"
                   class="w-full"
                   icon="pi pi-check"
                   label="Save"

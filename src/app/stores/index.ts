@@ -1,2 +1,6 @@
+export * from './setting.state'
+export * from './setting.action'
 export * from './shooting.state'
 export * from './shooting.action'
+export * from './statistic.state'
+export * from './statistic.action'

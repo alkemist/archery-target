@@ -21,6 +21,10 @@ export class MathHelper {
         return Math.ceil(value * Math.pow(10, decimal)) / Math.pow(10, decimal);
     }
 
+    static reduce(value: number, decimal: number) {
+        return Math.round(value / Math.pow(10, decimal));
+    }
+
     static inCircle(point: CoordinateInterface, center: CoordinateInterface, r: number) {
         const dist_points
             = Math.pow(point.x - center.x, 2) + Math.pow(point.y - center.y, 2);

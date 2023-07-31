@@ -9,7 +9,7 @@ import {
     SettingsComponent,
     ShootingComponent,
     ShootingsComponent,
-    StatsComponent
+    StatisticsComponent
 } from '@components';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -25,7 +25,7 @@ import './app.database';
         ShootingComponent,
         ShootingsComponent,
         SettingsComponent,
-        StatsComponent,
+        StatisticsComponent,
         HeaderComponent,
         BlockableComponent,
         ArrowComponent,

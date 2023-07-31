@@ -8,7 +8,13 @@ import {
     TitleStrategy,
     UrlTree
 } from "@angular/router";
-import {LoginComponent, SettingsComponent, ShootingComponent, ShootingsComponent, StatsComponent} from "@components";
+import {
+    LoginComponent,
+    SettingsComponent,
+    ShootingComponent,
+    ShootingsComponent,
+    StatisticsComponent
+} from "@components";
 import {AppService, UserService} from "@services";
 import {map, Observable} from "rxjs";
 import {shootingResolver} from "../services/shooting.service";
@@ -71,8 +77,8 @@ const routes: Routes = [
         title: "Settings",
     },
     {
-        path: "stats",
-        component: StatsComponent,
+        path: "statistics",
+        component: StatisticsComponent,
         canActivate: [loggedInGuard],
         title: "Statistics",
     },

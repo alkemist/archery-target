@@ -25,6 +25,8 @@ import {ToggleButtonModule} from 'primeng/togglebutton';
 import {ValdemortModule} from "ngx-valdemort";
 import {SidebarModule} from "primeng/sidebar";
 import {CalendarModule} from "primeng/calendar";
+import {NgxEchartsModule} from "ngx-echarts";
+import {TabViewModule} from "primeng/tabview";
 
 const modules = [
     ToolbarModule,
@@ -50,14 +52,24 @@ const modules = [
     SidebarModule,
     ToggleButtonModule,
     CalendarModule,
+    TabViewModule,
 
     ValdemortModule,
+
 ];
 
 
 @NgModule({
-    imports: modules,
-    exports: modules,
+    imports: [
+        ...modules,
+        NgxEchartsModule.forRoot({
+            echarts: () => import('echarts'),
+        }),
+    ],
+    exports: [
+        ...modules,
+        NgxEchartsModule
+    ],
     providers: [ConfirmationService, MessageService, DialogService, FilterService],
 })
 export class UiModule {

@@ -12,6 +12,7 @@ import {MapBuilder} from "../../../services/map.builder";
 import {SettingModel, ShootingModel} from "@models";
 import {ShootingService} from "../../../services/shooting.service";
 import {SettingService} from "../../../services/setting.service";
+import {StatisticService} from "../../../services/statistic.service";
 
 
 @Component({
@@ -45,12 +46,14 @@ export class HeaderComponent extends BaseComponent {
         private userService: UserService,
         private shootingService: ShootingService,
         private settingService: SettingService,
+        private statisticService: StatisticService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
     ) {
         super();
         this.services["shooting"] = this.shootingService;
         this.services["settingService"] = this.settingService;
+        this.services["statisticService"] = this.statisticService;
 
         this.title = toSignal(router.events.pipe(
             map(_ => titleService.getTitle().replaceAll("-", "/"))
@@ -65,7 +68,7 @@ export class HeaderComponent extends BaseComponent {
             .subscribe((logged) => {
                 this.logged.set(logged);
                 this.loading.set(false);
-                
+
                 this.mapBuilder.reloadSettings();
             });
 
@@ -125,7 +128,7 @@ export class HeaderComponent extends BaseComponent {
                 {
                     label: $localize`Statistics`,
                     icon: "pi pi-chart-bar",
-                    routerLink: ['/', 'stats'],
+                    routerLink: ['/', 'statistics'],
                 }
             );
 
@@ -151,6 +154,14 @@ export class HeaderComponent extends BaseComponent {
                             icon: "pi pi-refresh",
                             command: () => {
                                 void this.settingService.invalidStoredData();
+                                window.location.reload();
+                            }
+                        },
+                        {
+                            label: $localize`Invalid statistics`,
+                            icon: "pi pi-refresh",
+                            command: () => {
+                                void this.statisticService.invalidStoredData();
                                 window.location.reload();
                             }
                         }
@@ -207,16 +218,5 @@ export class HeaderComponent extends BaseComponent {
                 this.mapBuilder.clear();
             }
         });
-    }
-
-    submitShooting() {
-        const isNew = !this.shooting()?.id;
-
-        this.mapBuilder.saveShooting().then((shootingStored) => {
-            this.sidebarShowed.set(false);
-            if (isNew) {
-                void this.router.navigate(['shooting', shootingStored.id]);
-            }
-        })
     }
 }

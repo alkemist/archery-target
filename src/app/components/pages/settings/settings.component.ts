@@ -105,6 +105,6 @@ export class SettingsComponent extends BaseComponent {
     }
 
     customSort(event: SortEvent) {
-        event.data?.sort((data1, data2) => ArrayHelper.sort(event, data1, data2));
+        event.data?.sort((data1, data2) => ArrayHelper.sortTable(event, data1, data2));
     }
 }
