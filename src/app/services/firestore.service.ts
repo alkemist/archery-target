@@ -10,7 +10,7 @@ import {
     WrongApiKeyError,
     WrongPasswordError
 } from "@errors";
-import {FirestoreDataConverter} from "@firebase/firestore";
+import {FirestoreDataConverter, WithFieldValue} from "@firebase/firestore";
 import {LoggerService} from "@services";
 import {generatePushID, slugify} from "@tools";
 import {
@@ -33,6 +33,7 @@ import {MessageService} from "primeng/api";
 import {environment} from "../../environments/environment";
 import {VanillaError} from "../errors/vanilla.error";
 import {PermissionDeniedError} from "../errors/permission-denied.error";
+import {UnauthorizedDomainError} from "../errors/unauthorized-domain.error";
 
 
 export abstract class FirestoreService<
@@ -53,7 +54,9 @@ export abstract class FirestoreService<
     }
 
     catchKnownErrors(error: VanillaError) {
-        if (error.code === "permission-denied") {
+        if (error.code === "auth/unauthorized-domain") {
+            return new UnauthorizedDomainError();
+        } else if (error.code === "permission-denied") {
             return new PermissionDeniedError();
         } else if (error.message === "Quota exceeded.") {
             return new QuotaExceededError();
@@ -167,6 +170,10 @@ export abstract class FirestoreService<
     public async addOne(document: M): Promise<HasIdWithInterface<I>> {
         const id = generatePushID();
 
+        if (environment["APP_OFFLINE"]) {
+            return Promise.resolve(this.offlineOperation(document, id));
+        }
+
         try {
             const ref = doc(this.ref, id).withConverter(this.converter);
             await setDoc(ref, document.toFirestore());
@@ -181,6 +188,10 @@ export abstract class FirestoreService<
     }
 
     public async updateOne(document: M): Promise<HasIdWithInterface<I>> {
+        if (environment["APP_OFFLINE"]) {
+            return Promise.resolve(this.offlineOperation(document));
+        }
+
         if (!document.id) {
             throw new EmptyDocumentIdError(this.collectionName, document);
         }
@@ -199,6 +210,10 @@ export abstract class FirestoreService<
     }
 
     public async removeOne(document: HasIdInterface): Promise<void> {
+        if (environment["APP_OFFLINE"]) {
+            return Promise.resolve();
+        }
+
         if (!document.id) {
             throw new EmptyDocumentIdError(this.collectionName, document);
         }
@@ -245,5 +260,9 @@ export abstract class FirestoreService<
         return documents;
     }
 
-
+    private offlineOperation(document: M, id?: string) {
+        const documentData = this.converter.toFirestore(document.toFirestore() as WithFieldValue<I>);
+        console.log(documentData, id)
+        return (id ? {...documentData, id} : {...documentData, id: document.id}) as HasIdWithInterface<I>;
+    }
 }

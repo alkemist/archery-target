@@ -43,7 +43,7 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         super(messageService, loggerService, "user", $localize`User`, UserModel);
         this._isLoggedIn = new BehaviorSubject<boolean | null>(null);
 
-        if (environment["APP_OFFLINE"]) {
+        if (environment["APP_OFFLINE"] || environment["APP_NO_LOGIN"]) {
             this._user = new UserModel({
                 id: "",
                 name: "",
@@ -53,7 +53,14 @@ export class UserService extends FirestoreService<UserInterface, UserModel> {
         }
 
         onAuthStateChanged(this.auth, (userFirebase) => {
-            if (environment["APP_OFFLINE"]) {
+            if (environment["APP_OFFLINE"] || environment["APP_NO_LOGIN"]) {
+                this.messageService.add({
+                    severity: "info",
+                    detail: environment["APP_OFFLINE"]
+                        ? `${$localize`You are offline`}`
+                        : `${$localize`Login disabled`}`
+                });
+
                 this._isLoggedIn.next(true);
                 return;
             }

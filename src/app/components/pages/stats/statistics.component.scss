@@ -7,7 +7,10 @@
   ::ng-deep {
     .p-tabview-panels, .p-tabview-panel {
       height: 100%;
-      display: flex;
+    }
+
+    .ui-tabs.ui-tabs-left > .ui-tabs-nav {
+      width: 33%;
     }
   }
 }

@@ -1,50 +1,21 @@
-<blockable #lockable class="page-container__content flex flex-rows align-items-stretch gap-1">
-    <!--<p-tabView (activeIndexChange)="activeDistanceIndexChange()" *ngIf="!(loading())"
-               [(activeIndex)]="activeDistanceIndex">
-        <p-tabPanel *ngFor="let distance of distances; let i = index" [header]="distance + ' m'">
-            <p-tabView (activeIndexChange)="activeTargetIndexChange()" [(activeIndex)]="activeTargetIndex">
-                <p-tabPanel *ngFor="let target of getTargets(distance); let j = index" [header]="target + ' m'">
-                    <p-tabView [(activeIndex)]="activeTypeIndex">
-                        <p-tabPanel header="Score">
-                            <div *ngIf="activeDistanceIndex === i && activeTargetIndex === j && activeTypeIndex === 0"
-                                 [id]="distance + target"
-                                 [options]="getOptions(distance, target, 'score')" echarts></div>
-                        </p-tabPanel>
-                        <p-tabPanel header="Group">
-                            <div *ngIf="activeDistanceIndex === i && activeTargetIndex === j && activeTypeIndex === 1"
-                                 [id]="distance + target"
-                                 [options]="getOptions(distance, target, 'group')" echarts></div>
-                        </p-tabPanel>
-                        <p-tabPanel header="Arrow">
-                            <div *ngIf="activeDistanceIndex === i && activeTargetIndex === j && activeTypeIndex === 2"
-                                 [id]="distance + target"
-                                 [options]="getOptions(distance, target, 'arrow')" echarts></div>
-                        </p-tabPanel>
-                    </p-tabView>
-                </p-tabPanel>
-            </p-tabView>
-        </p-tabPanel>
-    </p-tabView>-->
-
-    <p-tabView [(activeIndex)]="activeTypeIndex" class="flex-1 h-full" styleClass="flex flex-column h-full">
+<blockable #lockable class="page-container__content flex flex-column align-items-stretch gap-1">
+    <p-tabView (activeIndexChange)="activeTypeIndex.set($event)" class="flex-1 h-full"
+               styleClass="flex flex-column h-full">
         <p-tabPanel class="flex-1 h-full" header="Score">
-            <div *ngIf="activeTypeIndex === 0" [options]="getOptions('score')"
+            <div *ngIf="activeTypeIndex() === 0"
+                 [options]="chartOptions['score']"
                  class="flex-1 h-full" echarts theme="macarons"></div>
         </p-tabPanel>
         <p-tabPanel header="Group">
-            <div *ngIf="activeTypeIndex === 1"
-                 [options]="getOptions('group')" echarts></div>
+            <div *ngIf="activeTypeIndex() === 1"
+                 [options]="chartOptions['group']"
+                 class="flex-1 h-full" echarts></div>
         </p-tabPanel>
         <p-tabPanel header="Arrow">
-            <div *ngIf="activeTypeIndex === 2"
-                 [options]="getOptions('arrow')" echarts></div>
-        </p-tabPanel>
-        <p-tabPanel header="Arrows">
-            <div *ngIf="activeTypeIndex === 3"
-                 [options]="getOptions('arrows')" echarts></div>
+            <div *ngIf="activeTypeIndex() === 2"
+                 [options]="chartOptions['arrow']" class="flex-1 h-full" echarts></div>
         </p-tabPanel>
     </p-tabView>
-    <div [options]="getOptions('arrows')" echarts theme="macarons"></div>
 </blockable>
 
 <p-blockUI [blocked]="loading()" [target]="lockable">

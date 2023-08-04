@@ -3,9 +3,9 @@ import BaseComponent from "@base-component";
 import {StatisticService} from "../../../services/statistic.service";
 import {EChartsOption, SeriesOption} from "echarts";
 import {StatisticModel} from "@models";
-import {ArrayHelper, DateHelper} from "@tools";
+import {DateHelper} from "@tools";
 
-type ChartType = 'arrow' | 'score' | 'group' | 'arrows';
+type ChartType = 'score' | 'group' | 'arrow';
 type Charts = Record<ChartType, EChartsOption>
 
 @Component({
@@ -17,22 +17,13 @@ type Charts = Record<ChartType, EChartsOption>
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatisticsComponent extends BaseComponent implements OnInit, AfterViewInit {
-
-    arrowsByDay = new Map<string, number>();
-    arrowsByMonth = new Map<string, number>();
-
     loading = signal<boolean>(true);
+    activeTypeIndex = signal<number>(0);
     statistics: Map<number, Map<number, Map<number, StatisticModel>>> | null = null;
-    activeDistanceIndex = 0;
-    activeTargetIndex = 0;
-    activeTypeIndex = 0;
-
-    //chartOptions = new Map<number, Map<number, Charts>>();
     chartOptions: Charts = {
         score: {},
         group: {},
         arrow: {},
-        arrows: {},
     };
 
     constructor(
@@ -41,30 +32,18 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
         super();
     }
 
-    get distances() {
-        return this.statistics ? ArrayHelper.sort([...this.statistics.keys()]) : [];
-    }
-
-    getTargets(distance: number) {
-        const targets = this.statistics ? this.statistics.get(distance) : null;
-
-        return targets ? ArrayHelper.sort([...targets.keys()]) : [];
-    }
-
     ngOnInit() {
 
     }
 
     async ngAfterViewInit() {
         this.statisticService.getStatistics().then((statisticData) => {
-            console.log(statisticData);
-
             if (statisticData) {
                 this.statistics = statisticData.statistics;
 
-                //this.chartOptions = new Map<number, Map<number, Charts>>();
                 const scoreSeries: SeriesOption[] = [],
-                    arrowsSeries: SeriesOption[] = [];
+                    groupSeries: SeriesOption[] = [],
+                    arrowSeries: SeriesOption[] = [];
                 const configurations: string[] = [];
                 const lines: string[] = [];
                 const dates = statisticData.dates;
@@ -87,18 +66,27 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                         },
                         orient: 'horizontal',
                         itemGap: 50,
-                        bottom: 0
+                        bottom: 0,
                     },
                     xAxis: {
-                        //boundaryGap: false,
+                        type: 'category',
                     },
                     yAxis: {
+                        type: 'value',
+                        splitNumber: 10,
+                        min: 'dataMin',
+                        axisLine: {
+                            onZero: false
+                        },
                         splitLine: {
                             show: true,
                             lineStyle: {
                                 color: "rgba(255,255,255)",
                                 opacity: 1
                             }
+                        },
+                        minorTick: {
+                            splitNumber: 2,
                         },
                         minorSplitLine: {
                             show: true,
@@ -107,52 +95,74 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                                 color: "rgba(255,255,255)",
                                 opacity: 0.2
                             }
-                        }
+                        },
                     }
                 };
+                
                 const baseSerie = {
                     smooth: true,
                 }
-                const colors = [
-                    'red', 'blue', 'yellow', 'green', 'orange'
-                ];
+
+                const colors: Record<number, string> = {
+                    10: 'white',
+                    15: 'black',
+                    20: 'blue',
+                    25: 'red',
+                    30: 'yellow',
+                    40: 'yellow',
+                    50: 'yellow',
+                    60: 'yellow',
+                }
 
                 this.statistics.forEach((statisticsByDistance, distance) => {
                     statisticsByDistance.forEach((statisticsByTarget, target) => {
-                        //const dates = [...statisticsByTarget.keys()];
-                        const averagesScore = [...statisticsByTarget.values()].map((value) => value.averageScore);
-                        const averagesGroup = [...statisticsByTarget.values()].map((value) => value.averageGroup);
-                        const averagesArrow = [...statisticsByTarget.values()].map((value) => value.averageArrow);
-
                         const configuration = `${distance} m - ${target} cm`;
                         const scoreLine = `Score ${configuration}`;
-                        const arrowsLine = `Arrow ${configuration}`;
 
                         if (configurations.indexOf(configuration) === -1) {
                             configurations.push(configuration);
                             lines.push(scoreLine)
-                            lines.push(arrowsLine)
                         }
 
-                        scoreSeries.push({
-                            ...baseSerie,
-                            name: scoreLine,
-                            type: 'line',
-                            color: colors[configurations.indexOf(configuration)],
-                            data: dates.map(date => ({
-                                name: DateHelper.secondToName(date),
-                                value: statisticsByTarget.get(date)?.averageScore as number
-                            }))
-                        })
+                        const color = colors[distance]
 
                         scoreSeries.push({
-                            name: arrowsLine,
-                            type: 'bar',
-                            color: colors[configurations.indexOf(configuration)],
-                            data: dates.map(date => ({
-                                name: DateHelper.secondToName(date),
-                                value: statisticsByTarget.get(date)?.arrows as number
-                            }))
+                            type: 'line',
+                            ...baseSerie,
+                            color,
+                            name: scoreLine,
+                            data: dates.map(date =>
+                                this.getPoint(date,
+                                    statisticsByTarget.get(date) as StatisticModel,
+                                    'averageScore'
+                                )
+                            )
+                        })
+
+                        groupSeries.push({
+                            type: 'line',
+                            ...baseSerie,
+                            color,
+                            name: scoreLine,
+                            data: dates.map(date =>
+                                this.getPoint(date,
+                                    statisticsByTarget.get(date) as StatisticModel,
+                                    'averageGroup'
+                                )
+                            )
+                        })
+
+                        arrowSeries.push({
+                            type: 'line',
+                            ...baseSerie,
+                            color,
+                            name: scoreLine,
+                            data: dates.map(date =>
+                                this.getPoint(date,
+                                    statisticsByTarget.get(date) as StatisticModel,
+                                    'averageArrow'
+                                )
+                            )
                         })
                     });
                 });
@@ -175,10 +185,55 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                     yAxis: {
                         ...baseOptions.yAxis,
                         type: 'value',
-                        min: 0,
                         max: 360,
                     },
                     series: scoreSeries
+                };
+
+                this.chartOptions['group'] = {
+                    ...baseOptions,
+                    title: {
+                        ...baseOptions.title,
+                        text: 'Group / 100',
+                    },
+                    legend: {
+                        ...baseOptions.legend,
+                        data: lines,
+                    },
+                    xAxis: {
+                        ...baseOptions.xAxis,
+                        type: 'category',
+                        data: dates.map(date => DateHelper.secondToName(date)),
+                    },
+                    yAxis: {
+                        ...baseOptions.yAxis,
+                        type: 'value',
+                        max: 100,
+                    },
+                    series: groupSeries
+                };
+
+                this.chartOptions['arrow'] = {
+                    ...baseOptions,
+                    title: {
+                        ...baseOptions.title,
+                        text: 'Arrow / 10',
+                    },
+                    legend: {
+                        ...baseOptions.legend,
+                        data: lines,
+                    },
+                    xAxis: {
+                        ...baseOptions.xAxis,
+                        type: 'category',
+                        data: dates.map(date => DateHelper.secondToName(date)),
+                    },
+                    yAxis: {
+                        ...baseOptions.yAxis,
+                        type: 'value',
+                        max: 10,
+                    },
+                    series: arrowSeries
                 };
             }
 
@@ -186,25 +241,15 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
         })
     }
 
-    /*getOptions(distance: any, target: any, type: 'arrow' | 'score' | 'group') {
-        const options = this.chartOptions.get(distance)?.get(target);
-
-        if (options) {
-            return options[type]
-        }
-
-        return {};
-    }*/
-    getOptions(type: ChartType) {
-        return this.chartOptions[type];
-    }
-
-    activeDistanceIndexChange() {
-        this.activeTargetIndex = 0;
-        this.activeTypeIndex = 0;
-    }
-
-    activeTargetIndexChange() {
-        this.activeTypeIndex = 0;
+    private getPoint(date: number, point: StatisticModel, field: keyof StatisticModel) {
+        return {
+            name: DateHelper.secondToName(date),
+            value: point ? point[field] as number : undefined,
+            label: {
+                show: true,
+                fontSize: 14,
+                formatter: () => `${point[field]} ★ ${point.arrows.toString()} ↑`
+            }
+        };
     }
 }

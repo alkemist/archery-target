@@ -185,6 +185,20 @@ p-dropdown.ng-touched.p-invalid > div {
   }
 }
 
+.p-tabview-nav {
+  li {
+    flex: 1;
+
+    a {
+      &:hover {
+        text-decoration: none;
+      }
+
+      justify-content: center;
+    }
+  }
+}
+
 .loader {
   padding: 20px;
   text-align: center;
