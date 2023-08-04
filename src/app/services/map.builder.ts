@@ -62,7 +62,6 @@ export class MapBuilder {
         private shootingService: ShootingService,
         private settingService: SettingService,
     ) {
-        this.reloadSettings();
     }
 
     get arrowsCount() {

@@ -18,7 +18,7 @@
   },
   "private": true,
   "dependencies": {
-    "@alkemist/ng-form-supervisor": "^1.1.13",
+    "@alkemist/ng-form-supervisor": "^1.1.14",
     "@angular/animations": "^16.0.0",
     "@angular/common": "^16.0.0",
     "@angular/compiler": "^16.0.0",
@@ -52,7 +52,6 @@
     "@angular/compiler-cli": "^16.0.2",
     "@angular/localize": "^16.0.2",
     "@netlify/functions": "^1.0.0",
-    "@ngxs/devtools-plugin": "^3.8.0",
     "@types/hammerjs": "^2.0.41",
     "@types/jest": "^27.4.0",
     "@types/node": "^20.2.3",

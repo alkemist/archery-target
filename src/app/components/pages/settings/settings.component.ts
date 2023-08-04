@@ -8,8 +8,8 @@ import {Table} from "primeng/table";
 import {TARGETS} from "../../../models/archery/targets";
 import {DISTANCES} from "../../../models/archery/distances";
 import {MapBuilder} from "../../../services/map.builder";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SettingService} from "../../../services/setting.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Component({

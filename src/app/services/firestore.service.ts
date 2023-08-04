@@ -32,6 +32,7 @@ import {objectConverter} from "../converters/object.converter";
 import {MessageService} from "primeng/api";
 import {environment} from "../../environments/environment";
 import {VanillaError} from "../errors/vanilla.error";
+import {PermissionDeniedError} from "../errors/permission-denied.error";
 
 
 export abstract class FirestoreService<
@@ -52,7 +53,11 @@ export abstract class FirestoreService<
     }
 
     catchKnownErrors(error: VanillaError) {
-        if (error.code === "auth/invalid-email") {
+        if (error.code === "permission-denied") {
+            return new PermissionDeniedError();
+        } else if (error.message === "Quota exceeded.") {
+            return new QuotaExceededError();
+        } else if (error.code === "auth/invalid-email") {
             return new InvalidEmailError();
         } else if (error.code === "auth/wrong-password" || error.code === "auth/_user-not-found") {
             return new WrongPasswordError();
@@ -71,7 +76,6 @@ export abstract class FirestoreService<
     }
 
     catchErrors(error: VanillaError, obj?: any) {
-        console.log(error.code, error)
         let customError = this.catchKnownErrors(error);
 
         if (!customError) {
@@ -225,21 +229,6 @@ export abstract class FirestoreService<
         const q = query(this.ref, ...queryConstraints).withConverter(this.converter);
         const documents: HasIdWithInterface<I>[] = [];
 
-        /*if (parseInt(environment['APP_OFFLINE'] ?? '0')) {
-          // Gérer les queryConstraints
-          offlineData.map((d) => {
-              return this.converter.fromFirestore({
-                data(options?: SnapshotOptions): HasIdWithInterface<I> {
-                  return d;
-                },
-              } as QueryDocumentSnapshot<HasIdWithInterface<I>>);
-            }
-          )
-          return this.jsonService.importOfflineData<HasIdWithInterface<I>>(
-            this.collectionName
-          );
-        }*/
-
         try {
             const querySnapshot = await getDocs(q);
 
@@ -249,21 +238,8 @@ export abstract class FirestoreService<
                     ...docSnapshot.data()
                 });
             });
-
-            /*if (isDevMode()) {
-              await this.jsonService.writeOfflineData<HasIdWithInterface<I>>(
-                this.collectionName,
-                documents
-              );
-            }*/
         } catch (e) {
-            const error = e as Error;
-
-            if (error.message === "Quota exceeded.") {
-                this.loggerService.error(new QuotaExceededError());
-            } else {
-                throw e;
-            }
+            return this.catchErrors(e as VanillaError);
         }
 
         return documents;

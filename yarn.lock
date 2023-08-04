@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@alkemist/compare-engine/-/compare-engine-1.2.8.tgz#8f55a8f646b09620384a5b582e950c8bbc1b2712"
   integrity sha512-vl/XHBGtwVWJ2F3K7lMGemMkmaDXJwziKAwlaWehdNO5+yv4bj8/upv0AsGGhrFeQHoYw2Od2l2o2J5Jru9vkw==
 
-"@alkemist/ng-form-supervisor@^1.1.13":
-  version "1.1.13"
-  resolved "https://registry.yarnpkg.com/@alkemist/ng-form-supervisor/-/ng-form-supervisor-1.1.13.tgz#13e3415bb4ba648e9ac074143f518fb55c53bd61"
-  integrity sha512-FUEc3cZ7FZjq66+NM8uTOExBAMf9p+vnet9DG+fzvMAO/Dmzr86tqnaY5ocGB1aNkHveksNcp966vw4ducD3vw==
+"@alkemist/ng-form-supervisor@^1.1.14":
+  version "1.1.14"
+  resolved "https://registry.yarnpkg.com/@alkemist/ng-form-supervisor/-/ng-form-supervisor-1.1.14.tgz#df26a589ccbdf4f5bfbfd0f3f0be3c2deee56bec"
+  integrity sha512-ZkCIRTsaTjOj71io9D5vj66zJdrqPVy3icfsft+ZXIn/M1Sfj5Cyudlo8svvwl7JP+vkf39ulBb5V5G8ls+Obg==
   dependencies:
     "@alkemist/compare-engine" "^1.2.8"
     "@angular/common" "^16.0.0"
@@ -3105,13 +3105,6 @@
   version "16.1.3"
   resolved "https://registry.yarnpkg.com/@ngtools/webpack/-/webpack-16.1.3.tgz#c8afd2504e1c5dbcc688be897b2f441a7bd91800"
   integrity sha512-YTL1RzP7ErJqskx+ZwdC/nWsOSBfC4yYWmMyWL2J0d+oJ3N2XIzrKVoDcZ4IVzv3Du+3zoGp0ups/wWXvfzM/Q==
-
-"@ngxs/devtools-plugin@^3.8.0":
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/@ngxs/devtools-plugin/-/devtools-plugin-3.8.1.tgz#43f0bcc83ece59baa6d141e41fd026f91de831fb"
-  integrity sha512-IRHoHdV/lxNXaisKGdcGvSNbrgjCpM06eiqC93K+tOfwgmDY/hNsDNmKlXn9xmdYxF9U6v/1CXtAr0Q0Ux7dVQ==
-  dependencies:
-    tslib "^2.2.0"
 
 "@ngxs/logger-plugin@^3.8.0":
   version "3.8.1"

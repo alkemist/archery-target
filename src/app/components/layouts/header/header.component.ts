@@ -32,7 +32,7 @@ export class HeaderComponent extends BaseComponent {
     });
 
     title;
-    menuItems: MenuItem[] = [...BaseMenuItems];
+    menuItems: MenuItem[] = [];
     services: Record<string, any> = {};
     noSleep = new NoSleep();
     appIsVisible$ = new Subject<boolean>();
@@ -69,7 +69,11 @@ export class HeaderComponent extends BaseComponent {
                 this.logged.set(logged);
                 this.loading.set(false);
 
-                this.mapBuilder.reloadSettings();
+                if (logged) {
+                    this.mapBuilder.reloadSettings();
+                } else {
+                    this.buildMenu([]);
+                }
             });
 
         this.mapBuilder.onShootingChange$
