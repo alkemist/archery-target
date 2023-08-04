@@ -44,7 +44,6 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                 const scoreSeries: SeriesOption[] = [],
                     groupSeries: SeriesOption[] = [],
                     arrowSeries: SeriesOption[] = [];
-                const configurations: string[] = [];
                 const lines: string[] = [];
                 const dates = statisticData.dates;
                 const baseOptions: EChartsOption = {
@@ -53,7 +52,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                         trigger: 'axis'
                     },
                     grid: {
-                        bottom: '20%'
+                        bottom: '200px'
                     },
                     title: {
                         textStyle: {
@@ -98,7 +97,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                         },
                     }
                 };
-                
+
                 const baseSerie = {
                     smooth: true,
                 }
@@ -116,12 +115,10 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
 
                 this.statistics.forEach((statisticsByDistance, distance) => {
                     statisticsByDistance.forEach((statisticsByTarget, target) => {
-                        const configuration = `${distance} m - ${target} cm`;
-                        const scoreLine = `Score ${configuration}`;
+                        const line = `${distance} m - ${target} cm`;
 
-                        if (configurations.indexOf(configuration) === -1) {
-                            configurations.push(configuration);
-                            lines.push(scoreLine)
+                        if (lines.indexOf(line) === -1) {
+                            lines.push(line)
                         }
 
                         const color = colors[distance]
@@ -130,7 +127,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                             type: 'line',
                             ...baseSerie,
                             color,
-                            name: scoreLine,
+                            name: line,
                             data: dates.map(date =>
                                 this.getPoint(date,
                                     statisticsByTarget.get(date) as StatisticModel,
@@ -143,7 +140,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                             type: 'line',
                             ...baseSerie,
                             color,
-                            name: scoreLine,
+                            name: line,
                             data: dates.map(date =>
                                 this.getPoint(date,
                                     statisticsByTarget.get(date) as StatisticModel,
@@ -156,7 +153,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                             type: 'line',
                             ...baseSerie,
                             color,
-                            name: scoreLine,
+                            name: line,
                             data: dates.map(date =>
                                 this.getPoint(date,
                                     statisticsByTarget.get(date) as StatisticModel,
@@ -185,7 +182,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                     yAxis: {
                         ...baseOptions.yAxis,
                         type: 'value',
-                        max: 360,
+                        //max: 360,
                     },
                     series: scoreSeries
                 };
@@ -208,7 +205,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                     yAxis: {
                         ...baseOptions.yAxis,
                         type: 'value',
-                        max: 100,
+                        //max: 100,
                     },
                     series: groupSeries
                 };
@@ -231,7 +228,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                     yAxis: {
                         ...baseOptions.yAxis,
                         type: 'value',
-                        max: 10,
+                        //max: 10,
                     },
                     series: arrowSeries
                 };

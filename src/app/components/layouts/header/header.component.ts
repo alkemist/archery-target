@@ -22,7 +22,7 @@ import {StatisticService} from "../../../services/statistic.service";
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent extends BaseComponent {
-    loading = signal(false);
+    loading = signal(true);
     logged = signal(false);
     sidebarShowed = signal(false);
     shooting = signal<ShootingModel | null>(null);
