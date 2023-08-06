@@ -5,7 +5,7 @@ import {EChartsOption, SeriesOption} from "echarts";
 import {StatisticModel} from "@models";
 import {DateHelper} from "@tools";
 
-type ChartType = 'score' | 'group' | 'arrow';
+type ChartType = 'score' | 'arrow' | 'group';
 type Charts = Record<ChartType, EChartsOption>
 
 @Component({
@@ -19,11 +19,11 @@ type Charts = Record<ChartType, EChartsOption>
 export class StatisticsComponent extends BaseComponent implements OnInit, AfterViewInit {
     loading = signal<boolean>(true);
     activeTypeIndex = signal<number>(0);
-    statistics: Map<number, Map<number, Map<number, StatisticModel>>> | null = null;
+    statistics: Map<number, Map<number, StatisticModel>> | null = null;
     chartOptions: Charts = {
         score: {},
-        group: {},
         arrow: {},
+        group: {},
     };
 
     constructor(
@@ -52,7 +52,7 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                         trigger: 'axis'
                     },
                     grid: {
-                        bottom: '200px'
+                        bottom: '100px'
                     },
                     title: {
                         textStyle: {
@@ -114,54 +114,52 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                 }
 
                 this.statistics.forEach((statisticsByDistance, distance) => {
-                    statisticsByDistance.forEach((statisticsByTarget, target) => {
-                        const line = `${distance} m - ${target} cm`;
+                    const line = `${distance} m`;
 
-                        if (lines.indexOf(line) === -1) {
-                            lines.push(line)
-                        }
+                    if (lines.indexOf(line) === -1) {
+                        lines.push(line)
+                    }
 
-                        const color = colors[distance]
+                    const color = colors[distance]
 
-                        scoreSeries.push({
-                            type: 'line',
-                            ...baseSerie,
-                            color,
-                            name: line,
-                            data: dates.map(date =>
-                                this.getPoint(date,
-                                    statisticsByTarget.get(date) as StatisticModel,
-                                    'averageScore'
-                                )
+                    scoreSeries.push({
+                        type: 'line',
+                        ...baseSerie,
+                        color,
+                        name: line,
+                        data: dates.map(date =>
+                            this.getPoint(date,
+                                statisticsByDistance.get(date) as StatisticModel,
+                                'averageScore'
                             )
-                        })
+                        )
+                    })
 
-                        groupSeries.push({
-                            type: 'line',
-                            ...baseSerie,
-                            color,
-                            name: line,
-                            data: dates.map(date =>
-                                this.getPoint(date,
-                                    statisticsByTarget.get(date) as StatisticModel,
-                                    'averageGroup'
-                                )
+                    arrowSeries.push({
+                        type: 'line',
+                        ...baseSerie,
+                        color,
+                        name: line,
+                        data: dates.map(date =>
+                            this.getPoint(date,
+                                statisticsByDistance.get(date) as StatisticModel,
+                                'averageArrow'
                             )
-                        })
+                        )
+                    })
 
-                        arrowSeries.push({
-                            type: 'line',
-                            ...baseSerie,
-                            color,
-                            name: line,
-                            data: dates.map(date =>
-                                this.getPoint(date,
-                                    statisticsByTarget.get(date) as StatisticModel,
-                                    'averageArrow'
-                                )
+                    groupSeries.push({
+                        type: 'line',
+                        ...baseSerie,
+                        color,
+                        name: line,
+                        data: dates.map(date =>
+                            this.getPoint(date,
+                                statisticsByDistance.get(date) as StatisticModel,
+                                'averageGroup'
                             )
-                        })
-                    });
+                        )
+                    })
                 });
 
                 this.chartOptions['score'] = {
@@ -187,29 +185,6 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                     series: scoreSeries
                 };
 
-                this.chartOptions['group'] = {
-                    ...baseOptions,
-                    title: {
-                        ...baseOptions.title,
-                        text: 'Group / 100',
-                    },
-                    legend: {
-                        ...baseOptions.legend,
-                        data: lines,
-                    },
-                    xAxis: {
-                        ...baseOptions.xAxis,
-                        type: 'category',
-                        data: dates.map(date => DateHelper.secondToName(date)),
-                    },
-                    yAxis: {
-                        ...baseOptions.yAxis,
-                        type: 'value',
-                        //max: 100,
-                    },
-                    series: groupSeries
-                };
-
                 this.chartOptions['arrow'] = {
                     ...baseOptions,
                     title: {
@@ -231,6 +206,29 @@ export class StatisticsComponent extends BaseComponent implements OnInit, AfterV
                         //max: 10,
                     },
                     series: arrowSeries
+                };
+
+                this.chartOptions['group'] = {
+                    ...baseOptions,
+                    title: {
+                        ...baseOptions.title,
+                        text: 'Group / 100',
+                    },
+                    legend: {
+                        ...baseOptions.legend,
+                        data: lines,
+                    },
+                    xAxis: {
+                        ...baseOptions.xAxis,
+                        type: 'category',
+                        data: dates.map(date => DateHelper.secondToName(date)),
+                    },
+                    yAxis: {
+                        ...baseOptions.yAxis,
+                        type: 'value',
+                        //max: 100,
+                    },
+                    series: groupSeries
                 };
             }
 

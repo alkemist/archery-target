@@ -2,7 +2,6 @@ import {DocumentBackInterface, DocumentFrontInterface, HasIdWithInterface} from 
 
 export interface StatisticFrontInterface extends DocumentFrontInterface {
     distance: number,
-    target: number,
     dateSeconds: number,
     averageArrow: number,
     averageGroup: number,

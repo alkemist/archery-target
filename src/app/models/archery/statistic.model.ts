@@ -8,7 +8,6 @@ export class StatisticModel extends DocumentModel implements HasIdInterface {
     countGroup = 0;
 
     private _distance: number;
-    private _target: number;
     private _dateSeconds: number;
     private _averageArrow: number;
     private _averageGroup: number;
@@ -20,7 +19,6 @@ export class StatisticModel extends DocumentModel implements HasIdInterface {
 
         this._dateSeconds = statistic.dateSeconds ?? (new Date()).getTime();
         this._distance = statistic?.distance ?? 0;
-        this._target = statistic?.target ?? 0;
         this._averageArrow = statistic?.averageArrow ?? 0;
         this._averageGroup = statistic?.averageGroup ?? 0;
         this._averageScore = statistic?.averageScore ?? 0;
@@ -47,14 +45,6 @@ export class StatisticModel extends DocumentModel implements HasIdInterface {
 
     set distance(distance: number) {
         this._distance = distance;
-    }
-
-    get target(): number {
-        return this._target;
-    }
-
-    set target(target: number) {
-        this._target = target;
     }
 
     get dateSeconds(): number {
@@ -90,7 +80,7 @@ export class StatisticModel extends DocumentModel implements HasIdInterface {
     }
 
     updateNameAndSlug() {
-        this._name = `${this.dateStr} - ${this.distance} - ${this.target}`;
+        this._name = `${this.dateStr} - ${this.distance}`;
         this._slug = slugify(this._name);
     }
 
@@ -98,7 +88,6 @@ export class StatisticModel extends DocumentModel implements HasIdInterface {
         return {
             ...super.toFirestore(),
             distance: this._distance,
-            target: this._target,
             dateSeconds: this._dateSeconds,
             averageArrow: this._averageArrow,
             averageGroup: this._averageGroup,

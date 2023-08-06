@@ -122,7 +122,7 @@ export class HeaderComponent extends BaseComponent {
                             routerLink: ['/', 'settings']
                         },
                         ...settings.map((setting) => ({
-                            label: `${setting.name} m : ${setting.value}`,
+                            label: `${setting.name} m : ${setting.valueStr}`,
                         }))
                     ]
                 }

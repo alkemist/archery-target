@@ -1,1 +1,1 @@
-export const DISTANCES = [10, 20, 30, 40, 50, 60, 70];
+export const DISTANCES = [10, 15, 18, 20, 25, 30, 40, 50, 60, 70];

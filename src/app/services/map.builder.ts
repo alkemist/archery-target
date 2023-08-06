@@ -15,6 +15,7 @@ import {Subject} from "rxjs";
 import {ShootingService} from "./shooting.service";
 import {CompareHelper, RecursivePartial} from "@alkemist/ng-form-supervisor";
 import {SettingService} from "./setting.service";
+import {ScoreCalculator} from "../models/archery/score-calculator";
 
 
 @Injectable({
@@ -24,7 +25,6 @@ export class MapBuilder {
     // @TODO Determiner le reglage du viseur optimal
 
     static TARGET_MARGIN = 200;
-    static ERROR_MARGIN = 10;
 
     modalOpened = signal(false);
     mapShowed = signal(false);
@@ -46,17 +46,16 @@ export class MapBuilder {
     private _hammerEnabled = true;
     private _isDragging = false;
     private _isZooming = false;
-    private _targetElement?: HTMLImageElement;
     private _shootingChanged = new Subject<ShootingModel>();
     private _settingsChanged = new Subject<SettingModel[]>();
     private _loaded = new Subject<boolean>();
     private _hammer?: HammerManager;
     private _pageElement?: HTMLElement;
     private _mapElement?: HTMLElement;
-    private _rayons: number[] = [];
     private _shooting: ShootingModel = new ShootingModel();
     private _shootingCenterViewRef?: ComponentRef<CenterComponent>;
     private _components = new Map<string, ComponentRef<ArrowComponent>>();
+    private _scoreCalculator?: ScoreCalculator;
 
     constructor(
         private shootingService: ShootingService,
@@ -125,7 +124,6 @@ export class MapBuilder {
         this._hammerEnabled = true;
         this._isDragging = false;
         this._isZooming = false;
-        this._rayons = [];
         this.mapShowed.set(false);
         this._viewContainerRef = undefined;
         this._shootingCenterViewRef = undefined;
@@ -309,16 +307,14 @@ export class MapBuilder {
     }
 
     setTargetElement(targetElement: HTMLImageElement) {
-        this._targetElement = targetElement;
         this._targetSize.w = targetElement.naturalWidth + MapBuilder.TARGET_MARGIN;
         this._targetSize.h = targetElement.naturalHeight + MapBuilder.TARGET_MARGIN;
         this._targetCenter.x = this._targetSize.w / 2;
         this._targetCenter.y = this._targetSize.h / 2;
-        this._shootingCenterMaxDistance = ((this._targetSize.w - MapBuilder.TARGET_MARGIN) / 2) - MapBuilder.ERROR_MARGIN;
+        this._shootingCenterMaxDistance = ((this._targetSize.w - MapBuilder.TARGET_MARGIN) / 2) - ScoreCalculator.ERROR_MARGIN;
 
         const rayon = MathHelper.round((this._targetSize.w - MapBuilder.TARGET_MARGIN) / 20)
-        this._rayons = Array.from({length: 10}, (_, i) =>
-            MathHelper.round(rayon * (i + 1)) + MapBuilder.ERROR_MARGIN)
+        this._scoreCalculator = new ScoreCalculator(this._targetCenter, rayon);
 
         this.updateSize();
 
@@ -432,14 +428,6 @@ export class MapBuilder {
         this._mapPosition.y = this._currentMapPosition.y;
     }
 
-    private calculScore(arrow: ArrowModel): number {
-        const index = this._rayons.findIndex((rayon) =>
-            MathHelper.inCircle(arrow.center, this._targetCenter, rayon)
-        )
-
-        return 10 - (index > -1 ? index : 10);
-    }
-
     private placeArrow(point: CoordinateInterface): ArrowModel {
         const position: CoordinateInterface = this.removeOffset(point);
 
@@ -464,7 +452,7 @@ export class MapBuilder {
             }
         });
 
-        arrow.score = this.calculScore(arrow)
+        arrow.score = this._scoreCalculator?.calculScore(arrow) ?? 0;
         arrow.distance = MathHelper.round(MathHelper.flatDistance(arrow.center, this._targetCenter));
 
         return arrow;

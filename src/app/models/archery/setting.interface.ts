@@ -2,7 +2,8 @@ import {DocumentBackInterface, DocumentFrontInterface, HasIdWithInterface} from 
 
 export interface SettingFrontInterface extends DocumentFrontInterface {
     distance: number,
-    value: number,
+    valueMin: number,
+    valueMax: number,
 }
 
 export type SettingBackInterface = Partial<SettingFrontInterface> & DocumentBackInterface;
