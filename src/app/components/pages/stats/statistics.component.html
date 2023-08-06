@@ -6,14 +6,14 @@
                  [options]="chartOptions['score']"
                  class="flex-1 h-full" echarts theme="macarons"></div>
         </p-tabPanel>
-        <p-tabPanel header="Group">
+        <p-tabPanel header="Arrow">
             <div *ngIf="activeTypeIndex() === 1"
+                 [options]="chartOptions['arrow']" class="flex-1 h-full" echarts></div>
+        </p-tabPanel>
+        <p-tabPanel header="Group">
+            <div *ngIf="activeTypeIndex() === 2"
                  [options]="chartOptions['group']"
                  class="flex-1 h-full" echarts></div>
-        </p-tabPanel>
-        <p-tabPanel header="Arrow">
-            <div *ngIf="activeTypeIndex() === 2"
-                 [options]="chartOptions['arrow']" class="flex-1 h-full" echarts></div>
         </p-tabPanel>
     </p-tabView>
 </blockable>

@@ -15,7 +15,11 @@
                     <p-sortIcon field="distance"></p-sortIcon>
                 </th>
                 <th pSortableColumn="value">
-                    <span i18n>Value</span>
+                    <span i18n>Value min</span>
+                    <p-sortIcon field="value"></p-sortIcon>
+                </th>
+                <th pSortableColumn="value">
+                    <span i18n>Value max</span>
                     <p-sortIcon field="value"></p-sortIcon>
                 </th>
                 <th style="min-width: 10%;max-width:200px;"></th>
@@ -66,11 +70,22 @@
                 <td>
                     <p-cellEditor>
                         <ng-template pTemplate="input">
-                            <p-inputNumber [(ngModel)]="toSettingModel(setting).value" [minFractionDigits]="1"
+                            <p-inputNumber [(ngModel)]="toSettingModel(setting).valueMin" [minFractionDigits]="1"
                                            [min]="0"></p-inputNumber>
                         </ng-template>
                         <ng-template pTemplate="output">
-                            {{toSettingModel(setting).value}}
+                            {{toSettingModel(setting).valueMin}}
+                        </ng-template>
+                    </p-cellEditor>
+                </td>
+                <td>
+                    <p-cellEditor>
+                        <ng-template pTemplate="input">
+                            <p-inputNumber [(ngModel)]="toSettingModel(setting).valueMax" [minFractionDigits]="1"
+                                           [min]="0"></p-inputNumber>
+                        </ng-template>
+                        <ng-template pTemplate="output">
+                            {{toSettingModel(setting).valueMax}}
                         </ng-template>
                     </p-cellEditor>
                 </td>
