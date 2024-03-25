@@ -252,5 +252,13 @@ p-dropdown.ng-touched.p-invalid > div {
       }
     }
   }
+
+  .p-datatable {
+    .p-datatable-wrapper {
+      .p-datatable-tbody > tr > td {
+        padding: 0;
+      }
+    }
+  }
 }
 
